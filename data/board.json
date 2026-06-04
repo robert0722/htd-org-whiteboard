@@ -6,8 +6,8 @@
       "title": "EVP of HTD Talent",
       "costType": "annual",
       "costAmount": "",
-      "x": 803.56640625,
-      "y": 34.2734375
+      "x": 836.92578125,
+      "y": 24
     },
     {
       "id": "melanie-edwards",
@@ -15,8 +15,8 @@
       "title": "Client Director at HTD Talent",
       "costType": "annual",
       "costAmount": "",
-      "x": 142.2042410714285,
-      "y": 182.98549107142853
+      "x": 284.4084821428571,
+      "y": 198.33705357142853
     },
     {
       "id": "sue-molina",
@@ -33,8 +33,8 @@
       "title": "IT Sourcer",
       "costType": "annual",
       "costAmount": "12000",
-      "x": 901.0680803571429,
-      "y": 621.4776785714286
+      "x": 1009.1316964285716,
+      "y": 626.8515625
     },
     {
       "id": "kristine-torreon",
@@ -42,8 +42,8 @@
       "title": "IT Sourcer",
       "costType": "annual",
       "costAmount": "12000",
-      "x": 1173.4782366071431,
-      "y": 621.0357142857143
+      "x": 1280.6992187500002,
+      "y": 625.9464285714287
     },
     {
       "id": "person-1780578540255",
@@ -78,8 +78,8 @@
       "title": "Role title",
       "costType": "annual",
       "costAmount": "80000",
-      "x": 24.189732142857025,
-      "y": 404.4185267857143
+      "x": 24,
+      "y": 386.93526785714283
     },
     {
       "id": "person-1780593845579",
@@ -87,17 +87,17 @@
       "title": "Role title",
       "costType": "annual",
       "costAmount": "30000",
-      "x": 796.5479910714287,
-      "y": 322.85937499999994
+      "x": 979.5948660714286,
+      "y": 252.0111607142856
     },
     {
       "id": "person-1780593913676",
-      "name": "BDM Experienced 2",
+      "name": "Junior BDM 1",
       "title": "Role title",
       "costType": "annual",
-      "costAmount": "80000",
-      "x": 274.33593749999994,
-      "y": 559.7488839285716
+      "costAmount": "45000",
+      "x": 282.4386160714286,
+      "y": 422.0591517857145
     },
     {
       "id": "person-1780594004201",
@@ -105,8 +105,17 @@
       "title": "Role title",
       "costType": "annual",
       "costAmount": "20000",
-      "x": 624.1886160714286,
-      "y": 621.7890625
+      "x": 756.2979910714286,
+      "y": 626.9229910714286
+    },
+    {
+      "id": "person-1780594725768",
+      "name": "Junior BDM 2",
+      "title": "Role title",
+      "costType": "annual",
+      "costAmount": "45000",
+      "x": 541.2287946428571,
+      "y": 401.0502232142857
     }
   ],
   "connections": [
@@ -164,6 +173,11 @@
       "id": "person-1780593845579-person-1780594004201",
       "fromId": "person-1780593845579",
       "toId": "person-1780594004201"
+    },
+    {
+      "id": "melanie-edwards-person-1780594725768",
+      "fromId": "melanie-edwards",
+      "toId": "person-1780594725768"
     }
   ],
   "zoom": 0.7
