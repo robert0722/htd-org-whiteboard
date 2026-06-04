@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" role="img" aria-label="HTD Talent square logo mark">
+  <g fill="#213160">
+    <path d="M39 318h40L201 72l-17-32L39 318Z"/>
+    <path d="M89 318h38l91-180-21-38L89 318Z"/>
+    <path d="M139 318h37l74-145 34 48h43L226 73l-22 42 43 62-108 141Z"/>
+    <path d="M174 118 137 190l12 23 49-95-12-22-12 22Z"/>
+  </g>
+  <g fill="#8CDBC3" fill-rule="evenodd">
+    <path d="M203 318h101l39-68-39-68h-78l-23 45h73l12 23-24 43h-48l-13 25Zm58-48h28l-14-27-14 27Z"/>
+    <path d="M314 318h34l-18-31-16 31Z"/>
+  </g>
+</svg>
