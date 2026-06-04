@@ -15,8 +15,8 @@
       "title": "Client Director at HTD Talent",
       "costType": "annual",
       "costAmount": "",
-      "x": 100.7421875,
-      "y": 299.9609375
+      "x": 142.2042410714285,
+      "y": 182.98549107142853
     },
     {
       "id": "sue-molina",
@@ -24,8 +24,8 @@
       "title": "Operations Manager",
       "costType": "annual",
       "costAmount": "20000",
-      "x": 803.2421875,
-      "y": 301.27734375
+      "x": 1602.1819196428573,
+      "y": 190.7695312499999
     },
     {
       "id": "lorens-laygo",
@@ -33,8 +33,8 @@
       "title": "IT Sourcer",
       "costType": "annual",
       "costAmount": "12000",
-      "x": 308.9921875,
-      "y": 622.0078125
+      "x": 904.0647321428573,
+      "y": 623.7154017857142
     },
     {
       "id": "kristine-torreon",
@@ -42,8 +42,8 @@
       "title": "IT Sourcer",
       "costType": "annual",
       "costAmount": "12000",
-      "x": 25.15234375,
-      "y": 618.15625
+      "x": 1167.3733258928576,
+      "y": 617.6372767857143
     },
     {
       "id": "person-1780578540255",
@@ -51,8 +51,8 @@
       "title": "Sales Ops",
       "costType": "annual",
       "costAmount": "17000",
-      "x": 1540.19140625,
-      "y": 302.578125
+      "x": 1962.289620535715,
+      "y": 415.6138392857142
     },
     {
       "id": "person-1780578590984",
@@ -60,8 +60,8 @@
       "title": "Marketing",
       "costType": "annual",
       "costAmount": "10000",
-      "x": 1536.5859375,
-      "y": 589.0859375
+      "x": 1963.2488839285713,
+      "y": 643.6171875
     },
     {
       "id": "person-1780578660422",
@@ -69,8 +69,44 @@
       "title": "Tech Screener",
       "costType": "annual",
       "costAmount": "20000",
-      "x": 801.7109375,
-      "y": 550.17578125
+      "x": 1634.5736607142858,
+      "y": 507.1679687500001
+    },
+    {
+      "id": "person-1780593760155",
+      "name": "BDM- Experienced",
+      "title": "Role title",
+      "costType": "annual",
+      "costAmount": "80000",
+      "x": 27.638392857142748,
+      "y": 432.36495535714283
+    },
+    {
+      "id": "person-1780593845579",
+      "name": "Sr. Recruiter- Offshore",
+      "title": "Role title",
+      "costType": "annual",
+      "costAmount": "30000",
+      "x": 939.6953125000001,
+      "y": 316.0345982142857
+    },
+    {
+      "id": "person-1780593913676",
+      "name": "BDM Experienced 2",
+      "title": "Role title",
+      "costType": "annual",
+      "costAmount": "80000",
+      "x": 318.59375,
+      "y": 432.77343750000006
+    },
+    {
+      "id": "person-1780594004201",
+      "name": "Recruiter- Offshore",
+      "title": "Role title",
+      "costType": "annual",
+      "costAmount": "20000",
+      "x": 619.7745535714286,
+      "y": 630.7232142857142
     }
   ],
   "connections": [
@@ -85,21 +121,6 @@
       "toId": "sue-molina"
     },
     {
-      "id": "melanie-edwards-lorens-laygo",
-      "fromId": "melanie-edwards",
-      "toId": "lorens-laygo"
-    },
-    {
-      "id": "melanie-edwards-kristine-torreon",
-      "fromId": "melanie-edwards",
-      "toId": "kristine-torreon"
-    },
-    {
-      "id": "robert-roll-person-1780578540255",
-      "fromId": "robert-roll",
-      "toId": "person-1780578540255"
-    },
-    {
       "id": "person-1780578540255-person-1780578590984",
       "fromId": "person-1780578540255",
       "toId": "person-1780578590984"
@@ -108,6 +129,41 @@
       "id": "sue-molina-person-1780578660422",
       "fromId": "sue-molina",
       "toId": "person-1780578660422"
+    },
+    {
+      "id": "melanie-edwards-person-1780593760155",
+      "fromId": "melanie-edwards",
+      "toId": "person-1780593760155"
+    },
+    {
+      "id": "robert-roll-person-1780593845579",
+      "fromId": "robert-roll",
+      "toId": "person-1780593845579"
+    },
+    {
+      "id": "person-1780593845579-lorens-laygo",
+      "fromId": "person-1780593845579",
+      "toId": "lorens-laygo"
+    },
+    {
+      "id": "person-1780593845579-kristine-torreon",
+      "fromId": "person-1780593845579",
+      "toId": "kristine-torreon"
+    },
+    {
+      "id": "melanie-edwards-person-1780593913676",
+      "fromId": "melanie-edwards",
+      "toId": "person-1780593913676"
+    },
+    {
+      "id": "sue-molina-person-1780578540255",
+      "fromId": "sue-molina",
+      "toId": "person-1780578540255"
+    },
+    {
+      "id": "person-1780593845579-person-1780594004201",
+      "fromId": "person-1780593845579",
+      "toId": "person-1780594004201"
     }
   ],
   "zoom": 0.7
