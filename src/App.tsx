@@ -41,6 +41,9 @@ type DragState =
   | null;
 
 const STORAGE_KEY = "htd-org-whiteboard-v1";
+const CLOUD_SEEDED_KEY = "htd-org-whiteboard-cloud-seeded-v1";
+const API_BASE_URL =
+  import.meta.env.VITE_BOARD_API_URL || "https://htd-org-whiteboard-api.onrender.com";
 const CARD_WIDTH = 236;
 const CARD_HEIGHT = 142;
 
@@ -153,13 +156,36 @@ function boardSignature(board: BoardState) {
   return JSON.stringify(board);
 }
 
+async function loadCloudBoard() {
+  const response = await fetch(`${API_BASE_URL}/api/board`);
+  if (!response.ok) {
+    throw new Error("Could not load shared board");
+  }
+
+  const payload = (await response.json()) as { board: BoardState | null };
+  return payload.board;
+}
+
+async function saveCloudBoard(board: BoardState) {
+  const response = await fetch(`${API_BASE_URL}/api/board`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(board)
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not save shared board");
+  }
+}
+
 export function App() {
   const [initialBoard] = useState<BoardState>(safeInitialState);
   const [board, setBoard] = useState<BoardState>(initialBoard);
   const [selectedId, setSelectedId] = useState(board.people[0]?.id ?? "");
   const [drag, setDrag] = useState<DragState>(null);
   const [savedSignature, setSavedSignature] = useState(boardSignature(initialBoard));
-  const [saveStatus, setSaveStatus] = useState("All changes saved");
+  const [saveStatus, setSaveStatus] = useState("Loading shared board");
+  const [isSaving, setIsSaving] = useState(false);
   const boardRef = useRef<HTMLDivElement | null>(null);
 
   const peopleById = useMemo(
@@ -199,6 +225,48 @@ export function App() {
   );
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateBoard() {
+      try {
+        const cloudBoard = await loadCloudBoard();
+        const localSaved = window.localStorage.getItem(STORAGE_KEY);
+        const shouldSeedCloud =
+          !cloudBoard &&
+          localSaved &&
+          window.localStorage.getItem(CLOUD_SEEDED_KEY) !== "true";
+
+        if (shouldSeedCloud) {
+          await saveCloudBoard(initialBoard);
+          window.localStorage.setItem(CLOUD_SEEDED_KEY, "true");
+        }
+
+        const nextBoard = cloudBoard ?? initialBoard;
+        if (cancelled) {
+          return;
+        }
+
+        setBoard(nextBoard);
+        setSelectedId(nextBoard.people[0]?.id ?? "");
+        setSavedSignature(boardSignature(nextBoard));
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextBoard));
+        setSaveStatus("All changes saved");
+      } catch {
+        if (!cancelled) {
+          setSavedSignature(boardSignature(initialBoard));
+          setSaveStatus("Offline: local board only");
+        }
+      }
+    }
+
+    hydrateBoard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialBoard]);
+
+  useEffect(() => {
     if (!hasUnsavedChanges) {
       return;
     }
@@ -213,6 +281,38 @@ export function App() {
   }, [hasUnsavedChanges]);
 
   useEffect(() => {
+    if (hasUnsavedChanges || !savedSignature) {
+      return;
+    }
+
+    const interval = window.setInterval(async () => {
+      try {
+        const cloudBoard = await loadCloudBoard();
+        if (!cloudBoard) {
+          return;
+        }
+
+        const cloudSignature = boardSignature(cloudBoard);
+        if (cloudSignature !== savedSignature) {
+          setBoard(cloudBoard);
+          setSelectedId((current) =>
+            cloudBoard.people.some((person) => person.id === current)
+              ? current
+              : cloudBoard.people[0]?.id ?? ""
+          );
+          setSavedSignature(cloudSignature);
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudBoard));
+          setSaveStatus("Synced latest board");
+        }
+      } catch {
+        setSaveStatus("Sync paused");
+      }
+    }, 6000);
+
+    return () => window.clearInterval(interval);
+  }, [hasUnsavedChanges, savedSignature]);
+
+  useEffect(() => {
     if (saveStatus !== "Saved just now") {
       return;
     }
@@ -224,11 +324,22 @@ export function App() {
     return () => window.clearTimeout(timeout);
   }, [saveStatus]);
 
-  function saveBoard() {
-    const nextSignature = boardSignature(board);
-    window.localStorage.setItem(STORAGE_KEY, nextSignature);
-    setSavedSignature(nextSignature);
-    setSaveStatus("Saved just now");
+  async function saveBoard() {
+    setIsSaving(true);
+    setSaveStatus("Saving");
+    try {
+      await saveCloudBoard(board);
+      const nextSignature = boardSignature(board);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+      window.localStorage.setItem(CLOUD_SEEDED_KEY, "true");
+      setSavedSignature(nextSignature);
+      setSaveStatus("Saved just now");
+    } catch {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+      setSaveStatus("Cloud save failed");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function toBoardPoint(event: PointerEvent) {
@@ -422,9 +533,10 @@ export function App() {
             type="button"
             className={`save-action ${hasUnsavedChanges ? "needs-save" : ""}`}
             onClick={saveBoard}
+            disabled={isSaving}
           >
             <Save size={18} />
-            Save
+            {isSaving ? "Saving" : "Save"}
           </button>
           <span className={`save-status ${hasUnsavedChanges ? "unsaved" : ""}`}>
             {hasUnsavedChanges ? "Unsaved changes" : saveStatus}
