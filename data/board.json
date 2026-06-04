@@ -6,7 +6,7 @@
       "title": "EVP of HTD Talent",
       "costType": "annual",
       "costAmount": "",
-      "x": 836.92578125,
+      "x": 978.7003348214286,
       "y": 24
     },
     {
@@ -24,8 +24,8 @@
       "title": "Operations Manager",
       "costType": "annual",
       "costAmount": "20000",
-      "x": 1538.169642857143,
-      "y": 213.68805803571414
+      "x": 1752.1316964285713,
+      "y": 221.7516741071427
     },
     {
       "id": "lorens-laygo",
@@ -69,8 +69,8 @@
       "title": "Tech Screener",
       "costType": "annual",
       "costAmount": "10000",
-      "x": 1536.9453125,
-      "y": 471.2639508928573
+      "x": 1624.3839285714287,
+      "y": 464.83537946428584
     },
     {
       "id": "person-1780593760155",
