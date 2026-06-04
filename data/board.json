@@ -1,0 +1,114 @@
+{
+  "people": [
+    {
+      "id": "robert-roll",
+      "name": "Robert Rolle",
+      "title": "EVP of HTD Talent",
+      "costType": "annual",
+      "costAmount": "",
+      "x": 803.56640625,
+      "y": 34.2734375
+    },
+    {
+      "id": "melanie-edwards",
+      "name": "Melanie Edwards",
+      "title": "Client Director at HTD Talent",
+      "costType": "annual",
+      "costAmount": "",
+      "x": 100.7421875,
+      "y": 299.9609375
+    },
+    {
+      "id": "sue-molina",
+      "name": "Sue Molina",
+      "title": "Operations Manager",
+      "costType": "annual",
+      "costAmount": "20000",
+      "x": 803.2421875,
+      "y": 301.27734375
+    },
+    {
+      "id": "lorens-laygo",
+      "name": "Lorens Laygo",
+      "title": "IT Sourcer",
+      "costType": "annual",
+      "costAmount": "12000",
+      "x": 308.9921875,
+      "y": 622.0078125
+    },
+    {
+      "id": "kristine-torreon",
+      "name": "Kristine Torreon",
+      "title": "IT Sourcer",
+      "costType": "annual",
+      "costAmount": "12000",
+      "x": 25.15234375,
+      "y": 618.15625
+    },
+    {
+      "id": "person-1780578540255",
+      "name": "Bhadz Jimlah",
+      "title": "Sales Ops",
+      "costType": "annual",
+      "costAmount": "17000",
+      "x": 1540.19140625,
+      "y": 302.578125
+    },
+    {
+      "id": "person-1780578590984",
+      "name": "Nash",
+      "title": "Marketing",
+      "costType": "annual",
+      "costAmount": "10000",
+      "x": 1536.5859375,
+      "y": 589.0859375
+    },
+    {
+      "id": "person-1780578660422",
+      "name": "Janelle Estillore",
+      "title": "Tech Screener",
+      "costType": "annual",
+      "costAmount": "20000",
+      "x": 801.7109375,
+      "y": 550.17578125
+    }
+  ],
+  "connections": [
+    {
+      "id": "robert-melanie",
+      "fromId": "robert-roll",
+      "toId": "melanie-edwards"
+    },
+    {
+      "id": "robert-sue",
+      "fromId": "robert-roll",
+      "toId": "sue-molina"
+    },
+    {
+      "id": "melanie-edwards-lorens-laygo",
+      "fromId": "melanie-edwards",
+      "toId": "lorens-laygo"
+    },
+    {
+      "id": "melanie-edwards-kristine-torreon",
+      "fromId": "melanie-edwards",
+      "toId": "kristine-torreon"
+    },
+    {
+      "id": "robert-roll-person-1780578540255",
+      "fromId": "robert-roll",
+      "toId": "person-1780578540255"
+    },
+    {
+      "id": "person-1780578540255-person-1780578590984",
+      "fromId": "person-1780578540255",
+      "toId": "person-1780578590984"
+    },
+    {
+      "id": "sue-molina-person-1780578660422",
+      "fromId": "sue-molina",
+      "toId": "person-1780578660422"
+    }
+  ],
+  "zoom": 1
+}
