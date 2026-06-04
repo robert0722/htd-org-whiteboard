@@ -157,7 +157,7 @@ function boardSignature(board: BoardState) {
 }
 
 async function loadCloudBoard() {
-  const response = await fetch(`${API_BASE_URL}/api/board`);
+  const response = await fetchWithRetry(`${API_BASE_URL}/api/board`);
   if (!response.ok) {
     throw new Error("Could not load shared board");
   }
@@ -167,7 +167,7 @@ async function loadCloudBoard() {
 }
 
 async function saveCloudBoard(board: BoardState) {
-  const response = await fetch(`${API_BASE_URL}/api/board`, {
+  const response = await fetchWithRetry(`${API_BASE_URL}/api/board`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(board)
@@ -176,6 +176,30 @@ async function saveCloudBoard(board: BoardState) {
   if (!response.ok) {
     throw new Error("Could not save shared board");
   }
+}
+
+async function fetchWithRetry(url: string, options?: RequestInit) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const response = await fetch(url, options);
+      if (response.status !== 404 || attempt === 3) {
+        return response;
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt === 3) {
+        throw error;
+      }
+    }
+
+    await new Promise((resolve) =>
+      window.setTimeout(resolve, 900 * (attempt + 1))
+    );
+  }
+
+  throw lastError ?? new Error("Request failed");
 }
 
 export function App() {
