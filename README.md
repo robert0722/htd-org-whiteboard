@@ -8,7 +8,7 @@ A lightweight HTD Talent org planning whiteboard for headcount planning sessions
 - Edit name, job title, reporting manager, annual/monthly cost, and cost cadence.
 - Connect people into an org hierarchy.
 - Show total annualized and monthly team cost.
-- Save one shared board that syncs between localhost and staging.
+- Create, rename, switch, save, and delete multiple shared boards independently.
 
 ## Live URLs
 

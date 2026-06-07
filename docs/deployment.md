@@ -78,7 +78,13 @@ Check API health:
 curl -sS https://htd-org-whiteboard-api.onrender.com/api/health
 ```
 
-Check shared board:
+Check shared boards:
+
+```bash
+curl -sS https://htd-org-whiteboard-api.onrender.com/api/boards
+```
+
+The legacy single-board endpoint should also return the first board for old clients:
 
 ```bash
 curl -sS https://htd-org-whiteboard-api.onrender.com/api/board
@@ -92,7 +98,7 @@ https://htd-org-whiteboard.onrender.com
 
 Expected result:
 
-- App loads the org board.
+- App loads the board selector and the org board.
 - Save button is present.
 - Total team cost appears in the right panel.
 - Existing shared people appear from `data/board.json`.

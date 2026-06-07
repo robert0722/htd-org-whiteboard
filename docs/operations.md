@@ -2,7 +2,7 @@
 
 ## How Saving Works
 
-The Save button writes the whole board to the shared API. The API commits the board to:
+The Save button writes the active board to the shared API. The API stores all board records in one v2 document and commits that document to:
 
 ```txt
 data/board.json
@@ -15,7 +15,7 @@ git pull --rebase
 git push
 ```
 
-Review `data/board.json` before resolving conflicts.
+Review `data/board.json` before resolving conflicts. It now contains a `boards` array; each board has its own `id`, `name`, timestamps, and `state`.
 
 ## Restoring or Editing Board State
 
@@ -37,7 +37,7 @@ git show <commit>:data/board.json
 
 ## Common Issues
 
-### Staging Loads Starter Data
+### Staging Loads Missing or Old Board Data
 
 Likely causes:
 
@@ -48,7 +48,7 @@ Likely causes:
 Checks:
 
 ```bash
-curl -sS https://htd-org-whiteboard-api.onrender.com/api/board
+curl -sS https://htd-org-whiteboard-api.onrender.com/api/boards
 curl -sS 'https://htd-org-whiteboard.onrender.com/?v=debug'
 ```
 
@@ -106,9 +106,9 @@ VITE_BOARD_API_URL=http://localhost:10000 npm run dev
 
 Run the API and Vite dev server in separate terminals.
 
-## Current Shared Board
+## Current Shared Boards
 
-As of the first shared-sync setup, the board had:
+The first v2 migration wrapped the existing org chart as `Main Board`. At migration time, that board had:
 
 - 8 people
 - 7 reporting connections

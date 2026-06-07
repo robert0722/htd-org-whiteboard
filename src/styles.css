@@ -38,6 +38,7 @@ button {
   gap: 8px;
   min-height: 38px;
   padding: 0 12px;
+  white-space: nowrap;
 }
 
 button:disabled {
@@ -47,6 +48,8 @@ button:disabled {
 
 .app-shell {
   background: #eef2f5;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
 }
 
@@ -56,17 +59,21 @@ button:disabled {
     radial-gradient(ellipse 80% 130% at 50% 0%, rgba(46, 194, 179, 0.12), transparent 48%),
     linear-gradient(180deg, #0b111e, #0f1729 68%, #0e1525);
   border-bottom: 1px solid rgba(82, 224, 210, 0.16);
-  display: flex;
-  gap: 18px;
-  height: 76px;
-  justify-content: space-between;
-  padding: 0 20px;
+  display: grid;
+  gap: 10px 18px;
+  grid-template-areas:
+    "brand toolbar"
+    "boards boards";
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 126px;
+  padding: 12px 20px;
 }
 
 .brand-lockup {
   align-items: center;
   color: #ffffff;
   display: flex;
+  grid-area: brand;
   gap: 12px;
   min-width: 240px;
 }
@@ -101,12 +108,61 @@ button:disabled {
   line-height: 1.1;
 }
 
+.board-controls {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  grid-area: boards;
+  grid-template-columns: minmax(150px, 220px) minmax(170px, 260px) auto auto;
+  justify-content: start;
+}
+
+.board-controls label {
+  display: grid;
+  gap: 5px;
+}
+
+.board-controls span {
+  color: #52e0d2;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.board-controls input,
+.board-controls select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.22);
+  border-radius: 8px;
+  color: #ffffff;
+  min-height: 38px;
+  padding: 0 11px;
+  width: 100%;
+}
+
+.board-controls input:focus,
+.board-controls select:focus {
+  border-color: #52e0d2;
+  box-shadow: 0 0 0 3px rgba(46, 194, 179, 0.16);
+  outline: none;
+}
+
+.board-controls input::placeholder {
+  color: #94a3b8;
+}
+
+.board-controls option {
+  color: #0f172a;
+}
+
 .toolbar {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  grid-area: toolbar;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .toolbar button {
@@ -115,6 +171,16 @@ button:disabled {
 
 .toolbar button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.14);
+}
+
+.topbar-danger {
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: rgba(254, 205, 211, 0.28);
+  color: #fecdd3;
+}
+
+.topbar-danger:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.24) !important;
 }
 
 .primary-action {
@@ -167,8 +233,9 @@ button:disabled {
 
 .workspace {
   display: grid;
+  flex: 1;
   grid-template-columns: minmax(0, 1fr) 320px;
-  height: calc(100vh - 76px);
+  min-height: 0;
 }
 
 .board-viewport {
@@ -179,6 +246,23 @@ button:disabled {
   background-size: 32px 32px;
   overflow: auto;
   position: relative;
+}
+
+.board-empty-state {
+  align-items: center;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  justify-content: center;
+  min-height: 520px;
+}
+
+.board-empty-state h2 {
+  font-size: 28px;
+  line-height: 1.12;
+  margin: 0;
 }
 
 .board {
@@ -414,6 +498,68 @@ marker polygon {
   text-align: center;
 }
 
+.modal-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.42);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 20;
+}
+
+.confirmation-dialog {
+  background: #ffffff;
+  border: 1px solid #dbe5ed;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+  color: #0f172a;
+  max-width: 420px;
+  padding: 20px;
+  width: min(100%, 420px);
+}
+
+.confirmation-dialog h2,
+.confirmation-dialog p {
+  margin: 0;
+}
+
+.confirmation-dialog h2 {
+  font-size: 21px;
+  line-height: 1.16;
+}
+
+.confirmation-dialog p {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin-top: 9px;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.confirmation-actions button:not(.primary-action):not(.danger-confirm-action) {
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.danger-confirm-action {
+  background: #be123c;
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.danger-confirm-action:hover {
+  background: #9f1239;
+}
+
 @media (max-width: 900px) {
   body {
     overflow: auto;
@@ -421,8 +567,12 @@ marker polygon {
 
   .topbar {
     align-items: flex-start;
-    height: auto;
-    min-height: 118px;
+    grid-template-areas:
+      "brand"
+      "boards"
+      "toolbar";
+    grid-template-columns: 1fr;
+    min-height: 0;
     padding: 14px;
   }
 
@@ -432,6 +582,12 @@ marker polygon {
 
   .toolbar {
     gap: 6px;
+    justify-content: flex-start;
+  }
+
+  .board-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
   }
 
   .toolbar button {
@@ -456,12 +612,8 @@ marker polygon {
 }
 
 @media (max-width: 620px) {
-  .topbar {
-    flex-direction: column;
-  }
-
-  .toolbar {
-    justify-content: flex-start;
+  .board-controls {
+    grid-template-columns: 1fr;
   }
 
   .divider,

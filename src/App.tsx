@@ -35,76 +35,41 @@ type BoardState = {
   zoom: number;
 };
 
+type BoardRecord = {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  state: BoardState;
+};
+
+type BoardsDocument = {
+  version: 2;
+  boards: BoardRecord[];
+};
+
 type DragState =
   | { type: "card"; id: string; offsetX: number; offsetY: number }
   | { type: "connector"; fromId: string; x: number; y: number }
   | null;
 
-const STORAGE_KEY = "htd-org-whiteboard-v1";
-const CLOUD_SEEDED_KEY = "htd-org-whiteboard-cloud-seeded-v1";
+type ConfirmationState = {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  tone?: "default" | "danger";
+  onConfirm: () => void | Promise<void>;
+};
+
+const LEGACY_STORAGE_KEY = "htd-org-whiteboard-v1";
+const STORAGE_KEY = "htd-org-whiteboard-v2";
+const LAST_ACTIVE_BOARD_KEY = "htd-org-whiteboard-active-board-v2";
 const API_BASE_URL =
   import.meta.env.VITE_BOARD_API_URL || "https://htd-org-whiteboard-api.onrender.com";
 const CARD_WIDTH = 236;
 const CARD_HEIGHT = 142;
-
-const starterPeople: PersonCard[] = [
-  {
-    id: "robert-roll",
-    name: "Robert Roll",
-    title: "EVP of HTD Talent",
-    costType: "annual",
-    costAmount: "",
-    x: 520,
-    y: 90
-  },
-  {
-    id: "melanie-edwards",
-    name: "Melanie Edwards",
-    title: "Client Director at HTD Talent",
-    costType: "annual",
-    costAmount: "",
-    x: 230,
-    y: 320
-  },
-  {
-    id: "sue-molina",
-    name: "Sue Molina",
-    title: "Operations Manager",
-    costType: "annual",
-    costAmount: "",
-    x: 520,
-    y: 320
-  },
-  {
-    id: "lorens-laygo",
-    name: "Lorens Laygo",
-    title: "IT Sourcer",
-    costType: "annual",
-    costAmount: "",
-    x: 810,
-    y: 320
-  },
-  {
-    id: "kristine-torreon",
-    name: "Kristine Torreon",
-    title: "IT Sourcer",
-    costType: "annual",
-    costAmount: "",
-    x: 810,
-    y: 540
-  }
-];
-
-const starterState: BoardState = {
-  people: starterPeople,
-  connections: [
-    { id: "robert-melanie", fromId: "robert-roll", toId: "melanie-edwards" },
-    { id: "robert-sue", fromId: "robert-roll", toId: "sue-molina" },
-    { id: "robert-lorens", fromId: "robert-roll", toId: "lorens-laygo" },
-    { id: "lorens-kristine", fromId: "lorens-laygo", toId: "kristine-torreon" }
-  ],
-  zoom: 1
-};
+const DEFAULT_BOARD_NAME = "Untitled board";
+const MAIN_BOARD_ID = "main-board";
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -112,25 +77,151 @@ const moneyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0
 });
 
-function safeInitialState(): BoardState {
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (!saved) {
-    return starterState;
+function blankBoardState(): BoardState {
+  return {
+    people: [],
+    connections: [],
+    zoom: 1
+  };
+}
+
+function cloneBoardState(board: BoardState): BoardState {
+  return {
+    people: board.people.map((person) => ({ ...person })),
+    connections: board.connections.map((connection) => ({ ...connection })),
+    zoom: board.zoom || 1
+  };
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function normalizeBoardState(value: unknown): BoardState | null {
+  if (!isObject(value)) {
+    return null;
   }
 
-  try {
-    const parsed = JSON.parse(saved) as BoardState;
-    if (!Array.isArray(parsed.people) || !Array.isArray(parsed.connections)) {
-      return starterState;
-    }
-    return {
-      people: parsed.people,
-      connections: parsed.connections,
-      zoom: parsed.zoom || 1
-    };
-  } catch {
-    return starterState;
+  const people = Array.isArray(value.people) ? value.people : null;
+  const connections = Array.isArray(value.connections) ? value.connections : null;
+  const zoom = typeof value.zoom === "number" ? value.zoom : 1;
+
+  if (!people || !connections) {
+    return null;
   }
+
+  return {
+    people: people as PersonCard[],
+    connections: connections as Connection[],
+    zoom
+  };
+}
+
+function normalizeBoardName(value: unknown) {
+  if (typeof value !== "string") {
+    return DEFAULT_BOARD_NAME;
+  }
+
+  const trimmed = value.trim();
+  return trimmed || DEFAULT_BOARD_NAME;
+}
+
+function normalizeBoardRecord(value: unknown, fallbackId: string): BoardRecord | null {
+  if (!isObject(value)) {
+    return null;
+  }
+
+  const state = normalizeBoardState(value.state);
+  const id =
+    typeof value.id === "string" && value.id.trim()
+      ? value.id.trim()
+      : fallbackId;
+
+  if (!state || !id) {
+    return null;
+  }
+
+  const now = new Date().toISOString();
+  return {
+    id,
+    name: normalizeBoardName(value.name),
+    createdAt:
+      typeof value.createdAt === "string" && value.createdAt
+        ? value.createdAt
+        : now,
+    updatedAt:
+      typeof value.updatedAt === "string" && value.updatedAt
+        ? value.updatedAt
+        : now,
+    state
+  };
+}
+
+function toBoardsDocument(value: unknown): BoardsDocument {
+  if (isObject(value) && value.version === 2 && Array.isArray(value.boards)) {
+    return {
+      version: 2,
+      boards: value.boards
+        .map((board, index) => normalizeBoardRecord(board, `board-${index + 1}`))
+        .filter((board): board is BoardRecord => Boolean(board))
+    };
+  }
+
+  const legacyBoard = normalizeBoardState(value);
+  if (legacyBoard) {
+    const now = new Date().toISOString();
+    return {
+      version: 2,
+      boards: [
+        {
+          id: MAIN_BOARD_ID,
+          name: "Main Board",
+          createdAt: now,
+          updatedAt: now,
+          state: legacyBoard
+        }
+      ]
+    };
+  }
+
+  return {
+    version: 2,
+    boards: []
+  };
+}
+
+function safeInitialDocument(): BoardsDocument {
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      return toBoardsDocument(JSON.parse(saved));
+    } catch {
+      // Fall through to legacy storage.
+    }
+  }
+
+  const legacySaved = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+  if (legacySaved) {
+    try {
+      return toBoardsDocument(JSON.parse(legacySaved));
+    } catch {
+      return { version: 2, boards: [] };
+    }
+  }
+
+  return {
+    version: 2,
+    boards: []
+  };
+}
+
+function chooseInitialBoardId(boards: BoardRecord[]) {
+  const lastActiveId = window.localStorage.getItem(LAST_ACTIVE_BOARD_KEY);
+  if (lastActiveId && boards.some((board) => board.id === lastActiveId)) {
+    return lastActiveId;
+  }
+
+  return boards[0]?.id ?? "";
 }
 
 function cardCenter(card: PersonCard) {
@@ -152,30 +243,106 @@ function clampZoom(value: number) {
   return Math.min(1.4, Math.max(0.6, Number(value.toFixed(2))));
 }
 
-function boardSignature(board: BoardState) {
-  return JSON.stringify(board);
+function boardRecordSignature(name: string, state: BoardState) {
+  return JSON.stringify({
+    name: normalizeBoardName(name),
+    state
+  });
 }
 
-async function loadCloudBoard() {
+function signaturesFromBoards(boards: BoardRecord[]) {
+  return boards.reduce<Record<string, string>>((signatures, board) => {
+    signatures[board.id] = boardRecordSignature(board.name, board.state);
+    return signatures;
+  }, {});
+}
+
+function upsertBoard(boards: BoardRecord[], board: BoardRecord) {
+  return [
+    ...boards.filter((entry) => entry.id !== board.id),
+    board
+  ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+function writeLocalBoards(boards: BoardRecord[]) {
+  window.localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      version: 2,
+      boards
+    })
+  );
+}
+
+async function loadLegacyCloudBoard() {
   const response = await fetchWithRetry(`${API_BASE_URL}/api/board`);
   if (!response.ok) {
     throw new Error("Could not load shared board");
   }
 
   const payload = (await response.json()) as { board: BoardState | null };
-  return payload.board;
+  if (!payload.board) {
+    return {
+      version: 2,
+      boards: []
+    };
+  }
+
+  return toBoardsDocument(payload.board);
 }
 
-async function saveCloudBoard(board: BoardState) {
-  const response = await fetchWithRetry(`${API_BASE_URL}/api/board`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(board)
-  });
+async function loadCloudBoards() {
+  const response = await fetchWithRetry(`${API_BASE_URL}/api/boards`);
+  if (response.status === 404) {
+    return loadLegacyCloudBoard();
+  }
+
+  if (!response.ok) {
+    throw new Error("Could not load shared boards");
+  }
+
+  const payload = (await response.json()) as unknown;
+  return toBoardsDocument(payload);
+}
+
+async function saveCloudBoard(board: BoardRecord) {
+  const response = await fetchWithRetry(
+    `${API_BASE_URL}/api/boards/${encodeURIComponent(board.id)}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(board)
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Could not save shared board");
   }
+
+  const payload = (await response.json()) as { board?: unknown };
+  return normalizeBoardRecord(payload.board, board.id) ?? board;
+}
+
+async function deleteCloudBoard(id: string) {
+  const response = await fetchWithRetry(
+    `${API_BASE_URL}/api/boards/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not delete shared board");
+  }
+
+  const payload = (await response.json()) as { boards?: unknown };
+  if (Array.isArray(payload.boards)) {
+    return payload.boards
+      .map((board, index) => normalizeBoardRecord(board, `board-${index + 1}`))
+      .filter((board): board is BoardRecord => Boolean(board));
+  }
+
+  return null;
 }
 
 async function fetchWithRetry(url: string, options?: RequestInit) {
@@ -203,14 +370,52 @@ async function fetchWithRetry(url: string, options?: RequestInit) {
 }
 
 export function App() {
-  const [initialBoard] = useState<BoardState>(safeInitialState);
-  const [board, setBoard] = useState<BoardState>(initialBoard);
-  const [selectedId, setSelectedId] = useState(board.people[0]?.id ?? "");
+  const [initialDocument] = useState<BoardsDocument>(safeInitialDocument);
+  const [boards, setBoards] = useState<BoardRecord[]>(initialDocument.boards);
+  const [savedSignatures, setSavedSignatures] = useState<Record<string, string>>(
+    () => signaturesFromBoards(initialDocument.boards)
+  );
+  const [activeBoardId, setActiveBoardId] = useState(() =>
+    chooseInitialBoardId(initialDocument.boards)
+  );
+  const initialActiveBoard =
+    initialDocument.boards.find((board) => board.id === activeBoardId) ?? null;
+  const [board, setBoard] = useState<BoardState>(() =>
+    initialActiveBoard ? cloneBoardState(initialActiveBoard.state) : blankBoardState()
+  );
+  const [boardName, setBoardName] = useState(
+    initialActiveBoard?.name ?? DEFAULT_BOARD_NAME
+  );
+  const [selectedId, setSelectedId] = useState(
+    initialActiveBoard?.state.people[0]?.id ?? ""
+  );
   const [drag, setDrag] = useState<DragState>(null);
-  const [savedSignature, setSavedSignature] = useState(boardSignature(initialBoard));
-  const [saveStatus, setSaveStatus] = useState("Loading shared board");
+  const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null);
+  const [saveStatus, setSaveStatus] = useState(
+    initialDocument.boards.length ? "Loading shared boards" : "No boards yet"
+  );
   const [isSaving, setIsSaving] = useState(false);
   const boardRef = useRef<HTMLDivElement | null>(null);
+
+  const activeBoard = boards.find((entry) => entry.id === activeBoardId) ?? null;
+  const activeSignature = boardRecordSignature(boardName, board);
+  const savedSignature = activeBoardId ? savedSignatures[activeBoardId] ?? "" : "";
+  const hasUnsavedChanges =
+    Boolean(activeBoardId) && activeSignature !== savedSignature;
+  const hasBoards = boards.length > 0;
+
+  const displayedBoards = useMemo(
+    () =>
+      boards.map((entry) =>
+        entry.id === activeBoardId
+          ? {
+              ...entry,
+              name: boardName
+            }
+          : entry
+      ),
+    [activeBoardId, boardName, boards]
+  );
 
   const peopleById = useMemo(
     () => new Map(board.people.map((person) => [person.id, person])),
@@ -221,7 +426,6 @@ export function App() {
   const selectedManagerId =
     board.connections.find((connection) => connection.toId === selectedId)
       ?.fromId ?? "";
-  const hasUnsavedChanges = boardSignature(board) !== savedSignature;
   const totalCost = useMemo(
     () =>
       board.people.reduce(
@@ -248,47 +452,113 @@ export function App() {
     [board.people]
   );
 
+  function activateBoard(record: BoardRecord | null, status?: string) {
+    setDrag(null);
+
+    if (!record) {
+      setActiveBoardId("");
+      setBoardName(DEFAULT_BOARD_NAME);
+      setBoard(blankBoardState());
+      setSelectedId("");
+      window.localStorage.removeItem(LAST_ACTIVE_BOARD_KEY);
+      setSaveStatus(status ?? "No boards yet");
+      return;
+    }
+
+    setActiveBoardId(record.id);
+    setBoardName(record.name);
+    setBoard(cloneBoardState(record.state));
+    setSelectedId(record.state.people[0]?.id ?? "");
+    window.localStorage.setItem(LAST_ACTIVE_BOARD_KEY, record.id);
+    setSaveStatus(status ?? "All changes saved");
+  }
+
+  function discardUnsavedNewBoard(nextBoards: BoardRecord[]) {
+    if (!activeBoardId || savedSignatures[activeBoardId]) {
+      return nextBoards;
+    }
+
+    return nextBoards.filter((entry) => entry.id !== activeBoardId);
+  }
+
+  function afterDiscardConfirmation(action: () => void) {
+    if (!hasUnsavedChanges) {
+      action();
+      return;
+    }
+
+    setConfirmation({
+      title: "Discard unsaved changes?",
+      message: "Your current board edits have not been saved.",
+      confirmLabel: "Discard changes",
+      tone: "danger",
+      onConfirm: action
+    });
+  }
+
   useEffect(() => {
     let cancelled = false;
 
-    async function hydrateBoard() {
+    async function hydrateBoards() {
       try {
-        const cloudBoard = await loadCloudBoard();
-        const localSaved = window.localStorage.getItem(STORAGE_KEY);
-        const shouldSeedCloud =
-          !cloudBoard &&
-          localSaved &&
-          window.localStorage.getItem(CLOUD_SEEDED_KEY) !== "true";
-
-        if (shouldSeedCloud) {
-          await saveCloudBoard(initialBoard);
-          window.localStorage.setItem(CLOUD_SEEDED_KEY, "true");
-        }
-
-        const nextBoard = cloudBoard ?? initialBoard;
+        const cloudDocument = await loadCloudBoards();
         if (cancelled) {
           return;
         }
 
-        setBoard(nextBoard);
-        setSelectedId(nextBoard.people[0]?.id ?? "");
-        setSavedSignature(boardSignature(nextBoard));
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextBoard));
-        setSaveStatus("All changes saved");
+        if (cloudDocument.boards.length) {
+          const nextId = chooseInitialBoardId(cloudDocument.boards);
+          const nextBoard =
+            cloudDocument.boards.find((entry) => entry.id === nextId) ??
+            cloudDocument.boards[0];
+
+          setBoards(cloudDocument.boards);
+          setSavedSignatures(signaturesFromBoards(cloudDocument.boards));
+          writeLocalBoards(cloudDocument.boards);
+          activateBoard(nextBoard);
+          return;
+        }
+
+        if (initialDocument.boards.length) {
+          const nextId = chooseInitialBoardId(initialDocument.boards);
+          setBoards(initialDocument.boards);
+          setSavedSignatures(signaturesFromBoards(initialDocument.boards));
+          activateBoard(
+            initialDocument.boards.find((entry) => entry.id === nextId) ??
+              initialDocument.boards[0],
+            "Local boards only"
+          );
+          return;
+        }
+
+        setBoards([]);
+        setSavedSignatures({});
+        activateBoard(null);
       } catch {
         if (!cancelled) {
-          setSavedSignature(boardSignature(initialBoard));
-          setSaveStatus("Offline: local board only");
+          if (initialDocument.boards.length) {
+            const nextId = chooseInitialBoardId(initialDocument.boards);
+            setBoards(initialDocument.boards);
+            setSavedSignatures(signaturesFromBoards(initialDocument.boards));
+            activateBoard(
+              initialDocument.boards.find((entry) => entry.id === nextId) ??
+                initialDocument.boards[0],
+              "Offline: local boards only"
+            );
+            return;
+          }
+
+          setSaveStatus("Offline: no boards loaded");
         }
       }
     }
 
-    hydrateBoard();
+    hydrateBoards();
 
     return () => {
       cancelled = true;
     };
-  }, [initialBoard]);
+  }, [initialDocument]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) {
@@ -305,28 +575,34 @@ export function App() {
   }, [hasUnsavedChanges]);
 
   useEffect(() => {
-    if (hasUnsavedChanges || !savedSignature) {
+    if (hasUnsavedChanges || !activeBoardId) {
       return;
     }
 
     const interval = window.setInterval(async () => {
       try {
-        const cloudBoard = await loadCloudBoard();
-        if (!cloudBoard) {
+        const cloudDocument = await loadCloudBoards();
+        const nextSignatures = signaturesFromBoards(cloudDocument.boards);
+        const activeCloudBoard =
+          cloudDocument.boards.find((entry) => entry.id === activeBoardId) ??
+          null;
+
+        setBoards(cloudDocument.boards);
+        setSavedSignatures(nextSignatures);
+        writeLocalBoards(cloudDocument.boards);
+
+        if (!activeCloudBoard) {
+          activateBoard(cloudDocument.boards[0] ?? null, "Board deleted elsewhere");
           return;
         }
 
-        const cloudSignature = boardSignature(cloudBoard);
+        const cloudSignature = boardRecordSignature(
+          activeCloudBoard.name,
+          activeCloudBoard.state
+        );
+
         if (cloudSignature !== savedSignature) {
-          setBoard(cloudBoard);
-          setSelectedId((current) =>
-            cloudBoard.people.some((person) => person.id === current)
-              ? current
-              : cloudBoard.people[0]?.id ?? ""
-          );
-          setSavedSignature(cloudSignature);
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudBoard));
-          setSaveStatus("Synced latest board");
+          activateBoard(activeCloudBoard, "Synced latest board");
         }
       } catch {
         setSaveStatus("Sync paused");
@@ -334,7 +610,7 @@ export function App() {
     }, 6000);
 
     return () => window.clearInterval(interval);
-  }, [hasUnsavedChanges, savedSignature]);
+  }, [activeBoardId, hasUnsavedChanges, savedSignature]);
 
   useEffect(() => {
     if (saveStatus !== "Saved just now") {
@@ -349,18 +625,117 @@ export function App() {
   }, [saveStatus]);
 
   async function saveBoard() {
+    if (!activeBoardId) {
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const draftRecord: BoardRecord = {
+      id: activeBoardId,
+      name: normalizeBoardName(boardName),
+      createdAt: activeBoard?.createdAt ?? now,
+      updatedAt: activeBoard?.updatedAt ?? now,
+      state: cloneBoardState(board)
+    };
+
     setIsSaving(true);
     setSaveStatus("Saving");
     try {
-      await saveCloudBoard(board);
-      const nextSignature = boardSignature(board);
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
-      window.localStorage.setItem(CLOUD_SEEDED_KEY, "true");
-      setSavedSignature(nextSignature);
+      const savedBoard = await saveCloudBoard(draftRecord);
+      const nextBoards = upsertBoard(boards, savedBoard);
+
+      setBoards(nextBoards);
+      setBoardName(savedBoard.name);
+      setBoard(cloneBoardState(savedBoard.state));
+      setSavedSignatures(signaturesFromBoards(nextBoards));
+      writeLocalBoards(nextBoards);
+      window.localStorage.setItem(LAST_ACTIVE_BOARD_KEY, savedBoard.id);
       setSaveStatus("Saved just now");
     } catch {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+      writeLocalBoards(upsertBoard(boards, draftRecord));
       setSaveStatus("Cloud save failed");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function switchBoard(nextBoardId: string) {
+    if (!nextBoardId || nextBoardId === activeBoardId) {
+      return;
+    }
+
+    afterDiscardConfirmation(() => {
+      const nextBoards = discardUnsavedNewBoard(boards);
+      const nextBoard = nextBoards.find((entry) => entry.id === nextBoardId);
+      if (!nextBoard) {
+        return;
+      }
+
+      setBoards(nextBoards);
+      writeLocalBoards(nextBoards);
+      activateBoard(nextBoard);
+    });
+  }
+
+  function createBoard() {
+    afterDiscardConfirmation(() => {
+      const now = new Date().toISOString();
+      const nextBoards = discardUnsavedNewBoard(boards);
+      const newBoard: BoardRecord = {
+        id: `board-${Date.now()}`,
+        name: DEFAULT_BOARD_NAME,
+        createdAt: now,
+        updatedAt: now,
+        state: blankBoardState()
+      };
+
+      setBoards([...nextBoards, newBoard]);
+      activateBoard(newBoard, "New board ready to save");
+    });
+  }
+
+  function deleteBoard() {
+    if (!activeBoardId) {
+      return;
+    }
+
+    setConfirmation({
+      title: "Delete board?",
+      message: `"${normalizeBoardName(boardName)}" will be removed for everyone.`,
+      confirmLabel: "Delete board",
+      tone: "danger",
+      onConfirm: deleteActiveBoard
+    });
+  }
+
+  async function deleteActiveBoard() {
+    const nextLocalBoards = boards.filter((entry) => entry.id !== activeBoardId);
+    const nextActiveBoard = nextLocalBoards[0] ?? null;
+
+    if (!savedSignatures[activeBoardId]) {
+      setBoards(nextLocalBoards);
+      writeLocalBoards(nextLocalBoards);
+      activateBoard(nextActiveBoard, nextActiveBoard ? "Board deleted" : "No boards yet");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveStatus("Deleting board");
+    try {
+      const cloudBoards = await deleteCloudBoard(activeBoardId);
+      const nextBoards = cloudBoards ?? nextLocalBoards;
+      const nextSignatures = signaturesFromBoards(nextBoards);
+      const nextBoard =
+        nextBoards.find((entry) => entry.id === nextActiveBoard?.id) ??
+        nextBoards[0] ??
+        null;
+
+      setBoards(nextBoards);
+      setSavedSignatures(nextSignatures);
+      writeLocalBoards(nextBoards);
+      activateBoard(nextBoard, nextBoard ? "Board deleted" : "No boards yet");
+    } catch {
+      setSaveStatus("Delete failed");
     } finally {
       setIsSaving(false);
     }
@@ -402,7 +777,7 @@ export function App() {
   }
 
   function handlePointerMove(event: PointerEvent) {
-    if (!drag) {
+    if (!drag || !activeBoardId) {
       return;
     }
 
@@ -466,7 +841,7 @@ export function App() {
   }
 
   function updateSelectedPerson(updates: Partial<PersonCard>) {
-    if (!selectedPerson) {
+    if (!selectedPerson || !activeBoardId) {
       return;
     }
 
@@ -479,7 +854,7 @@ export function App() {
   }
 
   function updateSelectedManager(managerId: string) {
-    if (!selectedPerson) {
+    if (!selectedPerson || !activeBoardId) {
       return;
     }
 
@@ -503,6 +878,10 @@ export function App() {
   }
 
   function addPerson() {
+    if (!activeBoardId) {
+      return;
+    }
+
     const id = `person-${Date.now()}`;
     const person: PersonCard = {
       id,
@@ -522,7 +901,7 @@ export function App() {
   }
 
   function deleteSelected() {
-    if (!selectedPerson) {
+    if (!selectedPerson || !activeBoardId) {
       return;
     }
 
@@ -539,6 +918,10 @@ export function App() {
   }
 
   function fitView() {
+    if (!activeBoardId) {
+      return;
+    }
+
     setBoard((current) => ({ ...current, zoom: 0.82 }));
   }
 
@@ -552,12 +935,53 @@ export function App() {
             <h1>Org Whiteboard</h1>
           </div>
         </div>
+
+        <div className="board-controls" aria-label="Board controls">
+          <label className="board-select">
+            <span>Board</span>
+            <select
+              value={activeBoardId}
+              onChange={(event) => switchBoard(event.target.value)}
+              disabled={!hasBoards || isSaving}
+            >
+              {!hasBoards && <option value="">No boards</option>}
+              {displayedBoards.map((entry) => (
+                <option value={entry.id} key={entry.id}>
+                  {normalizeBoardName(entry.name)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="board-name">
+            <span>Name</span>
+            <input
+              value={activeBoardId ? boardName : ""}
+              onChange={(event) => setBoardName(event.target.value)}
+              disabled={!activeBoardId || isSaving}
+              placeholder={DEFAULT_BOARD_NAME}
+            />
+          </label>
+          <button type="button" className="primary-action" onClick={createBoard}>
+            <Plus size={18} />
+            New board
+          </button>
+          <button
+            type="button"
+            className="topbar-danger"
+            onClick={deleteBoard}
+            disabled={!activeBoardId || isSaving}
+          >
+            <Trash2 size={18} />
+            Delete board
+          </button>
+        </div>
+
         <div className="toolbar" aria-label="Whiteboard controls">
           <button
             type="button"
             className={`save-action ${hasUnsavedChanges ? "needs-save" : ""}`}
             onClick={saveBoard}
-            disabled={isSaving}
+            disabled={!activeBoardId || isSaving}
           >
             <Save size={18} />
             {isSaving ? "Saving" : "Save"}
@@ -565,7 +989,12 @@ export function App() {
           <span className={`save-status ${hasUnsavedChanges ? "unsaved" : ""}`}>
             {hasUnsavedChanges ? "Unsaved changes" : saveStatus}
           </span>
-          <button type="button" className="primary-action" onClick={addPerson}>
+          <button
+            type="button"
+            className="primary-action"
+            onClick={addPerson}
+            disabled={!activeBoardId}
+          >
             <Plus size={18} />
             Add person
           </button>
@@ -577,6 +1006,7 @@ export function App() {
           <button
             type="button"
             aria-label="Zoom out"
+            disabled={!activeBoardId}
             onClick={() =>
               setBoard((current) => ({
                 ...current,
@@ -590,6 +1020,7 @@ export function App() {
           <button
             type="button"
             aria-label="Zoom in"
+            disabled={!activeBoardId}
             onClick={() =>
               setBoard((current) => ({
                 ...current,
@@ -599,7 +1030,7 @@ export function App() {
           >
             <ZoomIn size={18} />
           </button>
-          <button type="button" onClick={fitView}>
+          <button type="button" onClick={fitView} disabled={!activeBoardId}>
             <LocateFixed size={18} />
             Fit
           </button>
@@ -613,94 +1044,104 @@ export function App() {
           onPointerUp={handlePointerUp}
           onPointerCancel={() => setDrag(null)}
         >
-          <div
-            className="board"
-            ref={boardRef}
-            style={{
-              transform: `scale(${board.zoom})`,
-              width: `${1440 / board.zoom}px`,
-              height: `${980 / board.zoom}px`
-            }}
-          >
-            <svg className="connections" aria-hidden="true">
-              <defs>
-                <marker
-                  id="arrowhead"
-                  markerWidth="10"
-                  markerHeight="7"
-                  refX="9"
-                  refY="3.5"
-                  orient="auto"
-                >
-                  <polygon points="0 0, 10 3.5, 0 7" />
-                </marker>
-              </defs>
-              {board.connections.map((connection) => {
-                const from = peopleById.get(connection.fromId);
-                const to = peopleById.get(connection.toId);
-                if (!from || !to) {
-                  return null;
-                }
+          {activeBoardId ? (
+            <div
+              className="board"
+              ref={boardRef}
+              style={{
+                transform: `scale(${board.zoom})`,
+                width: `${1440 / board.zoom}px`,
+                height: `${980 / board.zoom}px`
+              }}
+            >
+              <svg className="connections" aria-hidden="true">
+                <defs>
+                  <marker
+                    id="arrowhead"
+                    markerWidth="10"
+                    markerHeight="7"
+                    refX="9"
+                    refY="3.5"
+                    orient="auto"
+                  >
+                    <polygon points="0 0, 10 3.5, 0 7" />
+                  </marker>
+                </defs>
+                {board.connections.map((connection) => {
+                  const from = peopleById.get(connection.fromId);
+                  const to = peopleById.get(connection.toId);
+                  if (!from || !to) {
+                    return null;
+                  }
 
-                const start = cardCenter(from);
-                const end = cardCenter(to);
-                const curve = Math.max(70, Math.abs(end.y - start.y) / 2);
-                return (
-                  <path
-                    key={connection.id}
-                    className="connection-line"
-                    d={`M ${start.x} ${start.y + CARD_HEIGHT / 2 - 12} C ${start.x} ${start.y + curve}, ${end.x} ${end.y - curve}, ${end.x} ${end.y - CARD_HEIGHT / 2 + 12}`}
-                    markerEnd="url(#arrowhead)"
-                  />
-                );
-              })}
-              {drag?.type === "connector" &&
-                peopleById.get(drag.fromId) &&
-                (() => {
-                  const from = peopleById.get(drag.fromId)!;
                   const start = cardCenter(from);
+                  const end = cardCenter(to);
+                  const curve = Math.max(70, Math.abs(end.y - start.y) / 2);
                   return (
                     <path
-                      className="connection-line draft"
-                      d={`M ${start.x} ${start.y + CARD_HEIGHT / 2 - 12} C ${start.x} ${start.y + 90}, ${drag.x} ${drag.y - 90}, ${drag.x} ${drag.y}`}
+                      key={connection.id}
+                      className="connection-line"
+                      d={`M ${start.x} ${start.y + CARD_HEIGHT / 2 - 12} C ${start.x} ${start.y + curve}, ${end.x} ${end.y - curve}, ${end.x} ${end.y - CARD_HEIGHT / 2 + 12}`}
+                      markerEnd="url(#arrowhead)"
                     />
                   );
-                })()}
-            </svg>
+                })}
+                {drag?.type === "connector" &&
+                  peopleById.get(drag.fromId) &&
+                  (() => {
+                    const from = peopleById.get(drag.fromId)!;
+                    const start = cardCenter(from);
+                    return (
+                      <path
+                        className="connection-line draft"
+                        d={`M ${start.x} ${start.y + CARD_HEIGHT / 2 - 12} C ${start.x} ${start.y + 90}, ${drag.x} ${drag.y - 90}, ${drag.x} ${drag.y}`}
+                      />
+                    );
+                  })()}
+              </svg>
 
-            {board.people.map((person) => (
-              <article
-                className={`person-card ${
-                  selectedId === person.id ? "selected" : ""
-                }`}
-                data-person-id={person.id}
-                key={person.id}
-                onPointerDown={(event) => handleCardPointerDown(event, person)}
-                style={{ left: person.x, top: person.y }}
-              >
-                <div className="card-header">
-                  <div className="avatar">{person.name.slice(0, 1)}</div>
-                  <button
-                    type="button"
-                    className="connector-handle"
-                    aria-label={`Connect ${person.name}`}
-                    title="Drag to another card to connect"
-                    onPointerDown={(event) =>
-                      handleConnectorPointerDown(event, person.id)
-                    }
-                  >
-                    <Link2 size={16} />
-                  </button>
-                </div>
-                <h2>{person.name}</h2>
-                <p>{person.title}</p>
-                <div className="cost-row">
-                  <CircleDollarSign size={16} />
-                  <span>{formatCost(person)}</span>
-                </div>
-              </article>
-            ))}
-          </div>
+              {board.people.map((person) => (
+                <article
+                  className={`person-card ${
+                    selectedId === person.id ? "selected" : ""
+                  }`}
+                  data-person-id={person.id}
+                  key={person.id}
+                  onPointerDown={(event) => handleCardPointerDown(event, person)}
+                  style={{ left: person.x, top: person.y }}
+                >
+                  <div className="card-header">
+                    <div className="avatar">{person.name.slice(0, 1)}</div>
+                    <button
+                      type="button"
+                      className="connector-handle"
+                      aria-label={`Connect ${person.name}`}
+                      title="Drag to another card to connect"
+                      onPointerDown={(event) =>
+                        handleConnectorPointerDown(event, person.id)
+                      }
+                    >
+                      <Link2 size={16} />
+                    </button>
+                  </div>
+                  <h2>{person.name}</h2>
+                  <p>{person.title}</p>
+                  <div className="cost-row">
+                    <CircleDollarSign size={16} />
+                    <span>{formatCost(person)}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="board-empty-state">
+              <h2>No boards yet</h2>
+              <button type="button" className="primary-action" onClick={createBoard}>
+                <Plus size={18} />
+                New board
+              </button>
+            </div>
+          )}
         </section>
 
         <aside className="inspector">
@@ -785,11 +1226,48 @@ export function App() {
             </form>
           ) : (
             <div className="empty-panel">
-              <p>Select a person card to edit details.</p>
+              <p>
+                {activeBoardId
+                  ? "Select a person card to edit details."
+                  : "Create a board to start editing people."}
+              </p>
             </div>
           )}
         </aside>
       </main>
+      {confirmation && (
+        <div className="modal-backdrop" role="presentation">
+          <section
+            aria-labelledby="confirmation-title"
+            aria-modal="true"
+            className="confirmation-dialog"
+            role="dialog"
+          >
+            <h2 id="confirmation-title">{confirmation.title}</h2>
+            <p>{confirmation.message}</p>
+            <div className="confirmation-actions">
+              <button type="button" onClick={() => setConfirmation(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={
+                  confirmation.tone === "danger"
+                    ? "danger-confirm-action"
+                    : "primary-action"
+                }
+                onClick={() => {
+                  const action = confirmation.onConfirm;
+                  setConfirmation(null);
+                  void action();
+                }}
+              >
+                {confirmation.confirmLabel}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
