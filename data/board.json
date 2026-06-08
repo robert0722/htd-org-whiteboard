@@ -195,7 +195,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Lean HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-06-08T20:49:52.776Z",
+      "updatedAt": "2026-06-08T20:50:07.675Z",
       "state": {
         "people": [
           {
@@ -212,7 +212,7 @@
             "name": "Melanie Edwards",
             "title": "Client Director at HTD Talent",
             "costType": "annual",
-            "costAmount": "110000",
+            "costAmount": "90000",
             "x": 284.4084821428571,
             "y": 198.33705357142853
           },
