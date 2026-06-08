@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-06-08T20:35:57.649Z",
+      "updatedAt": "2026-06-08T20:36:50.437Z",
       "state": {
         "people": [
           {
@@ -13,7 +13,7 @@
             "name": "Robert Rolle",
             "title": "EVP of HTD Talent",
             "costType": "annual",
-            "costAmount": "",
+            "costAmount": "210000",
             "x": 978.7003348214286,
             "y": 24
           },
@@ -22,7 +22,7 @@
             "name": "Melanie Edwards",
             "title": "Client Director at HTD Talent",
             "costType": "annual",
-            "costAmount": "",
+            "costAmount": "110000",
             "x": 284.4084821428571,
             "y": 198.33705357142853
           },
