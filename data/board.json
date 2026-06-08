@@ -193,9 +193,9 @@
     },
     {
       "id": "future-htd-org-2026-copy",
-      "name": "Future HTD Org: 2026 Copy",
+      "name": "Lean HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-06-08T20:38:32.691Z",
+      "updatedAt": "2026-06-08T20:49:35.362Z",
       "state": {
         "people": [
           {
@@ -222,8 +222,8 @@
             "title": "Operations Manager",
             "costType": "annual",
             "costAmount": "20000",
-            "x": 1752.1316964285713,
-            "y": 221.7516741071427
+            "x": 1351.2462797619048,
+            "y": 230.54507688492052
           },
           {
             "id": "lorens-laygo",
@@ -231,8 +231,8 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
-            "x": 1009.1316964285716,
-            "y": 626.8515625
+            "x": 40.52777777777777,
+            "y": 463.1232638888889
           },
           {
             "id": "kristine-torreon",
@@ -240,8 +240,8 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
-            "x": 1280.6992187500002,
-            "y": 625.9464285714287
+            "x": 379.64019097222246,
+            "y": 462.9169146825398
           },
           {
             "id": "person-1780578540255",
@@ -249,8 +249,8 @@
             "title": "Sales Ops",
             "costType": "annual",
             "costAmount": "17000",
-            "x": 1918.8856026785722,
-            "y": 451.73549107142856
+            "x": 1605.9472346230166,
+            "y": 468.2719494047619
           },
           {
             "id": "person-1780578590984",
@@ -258,8 +258,8 @@
             "title": "Marketing",
             "costType": "annual",
             "costAmount": "10000",
-            "x": 1934.716517857143,
-            "y": 655.6205357142858
+            "x": 1604.677455357143,
+            "y": 704.1274801587302
           },
           {
             "id": "person-1780578660422",
@@ -267,53 +267,8 @@
             "title": "Tech Screener",
             "costType": "annual",
             "costAmount": "10000",
-            "x": 1624.3839285714287,
-            "y": 464.83537946428584
-          },
-          {
-            "id": "person-1780593760155",
-            "name": "BDM- Experienced",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "80000",
-            "x": 24,
-            "y": 386.93526785714283
-          },
-          {
-            "id": "person-1780593845579",
-            "name": "Sr. Recruiter- Offshore",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "30000",
-            "x": 986.3526785714283,
-            "y": 270.9899553571428
-          },
-          {
-            "id": "person-1780593913676",
-            "name": "Junior BDM 1",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "45000",
-            "x": 282.4386160714286,
-            "y": 422.0591517857145
-          },
-          {
-            "id": "person-1780594004201",
-            "name": "Recruiter- Offshore",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "20000",
-            "x": 752.3024553571429,
-            "y": 619.3504464285713
-          },
-          {
-            "id": "person-1780594725768",
-            "name": "Junior BDM 2",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "45000",
-            "x": 541.2287946428571,
-            "y": 401.0502232142857
+            "x": 945.2823660714287,
+            "y": 464.0975322420636
           }
         ],
         "connections": [
@@ -338,44 +293,19 @@
             "toId": "person-1780578660422"
           },
           {
-            "id": "melanie-edwards-person-1780593760155",
-            "fromId": "melanie-edwards",
-            "toId": "person-1780593760155"
-          },
-          {
-            "id": "robert-roll-person-1780593845579",
-            "fromId": "robert-roll",
-            "toId": "person-1780593845579"
-          },
-          {
-            "id": "person-1780593845579-lorens-laygo",
-            "fromId": "person-1780593845579",
-            "toId": "lorens-laygo"
-          },
-          {
-            "id": "person-1780593845579-kristine-torreon",
-            "fromId": "person-1780593845579",
-            "toId": "kristine-torreon"
-          },
-          {
-            "id": "melanie-edwards-person-1780593913676",
-            "fromId": "melanie-edwards",
-            "toId": "person-1780593913676"
-          },
-          {
             "id": "sue-molina-person-1780578540255",
             "fromId": "sue-molina",
             "toId": "person-1780578540255"
           },
           {
-            "id": "person-1780593845579-person-1780594004201",
-            "fromId": "person-1780593845579",
-            "toId": "person-1780594004201"
+            "id": "melanie-edwards-lorens-laygo",
+            "fromId": "melanie-edwards",
+            "toId": "lorens-laygo"
           },
           {
-            "id": "melanie-edwards-person-1780594725768",
+            "id": "melanie-edwards-kristine-torreon",
             "fromId": "melanie-edwards",
-            "toId": "person-1780594725768"
+            "toId": "kristine-torreon"
           }
         ],
         "zoom": 0.9
