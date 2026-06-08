@@ -195,7 +195,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Lean HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-06-08T20:49:35.362Z",
+      "updatedAt": "2026-06-08T20:49:52.776Z",
       "state": {
         "people": [
           {
@@ -263,12 +263,12 @@
           },
           {
             "id": "person-1780578660422",
-            "name": "Screening Pool",
+            "name": "Tech Screening Pool",
             "title": "Tech Screener",
             "costType": "annual",
             "costAmount": "10000",
-            "x": 945.2823660714287,
-            "y": 464.0975322420636
+            "x": 1130.9898313492063,
+            "y": 476.0897197420636
           }
         ],
         "connections": [
