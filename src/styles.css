@@ -244,6 +244,7 @@ button:disabled {
     linear-gradient(rgba(15, 23, 42, 0.055) 1px, transparent 1px),
     linear-gradient(90deg, rgba(15, 23, 42, 0.055) 1px, transparent 1px);
   background-size: 32px 32px;
+  overscroll-behavior: contain;
   overflow: auto;
   position: relative;
 }

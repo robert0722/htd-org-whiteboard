@@ -61,6 +61,12 @@ type ConfirmationState = {
   onConfirm: () => void | Promise<void>;
 };
 
+type WebKitGestureEvent = Event & {
+  clientX: number;
+  clientY: number;
+  scale: number;
+};
+
 const LEGACY_STORAGE_KEY = "htd-org-whiteboard-v1";
 const STORAGE_KEY = "htd-org-whiteboard-v2";
 const LAST_ACTIVE_BOARD_KEY = "htd-org-whiteboard-active-board-v2";
@@ -395,7 +401,10 @@ export function App() {
     initialDocument.boards.length ? "Loading shared boards" : "No boards yet"
   );
   const [isSaving, setIsSaving] = useState(false);
+  const viewportRef = useRef<HTMLElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
+  const boardZoomRef = useRef(board.zoom);
+  const gestureStartZoomRef = useRef(board.zoom);
 
   const activeBoard = boards.find((entry) => entry.id === activeBoardId) ?? null;
   const activeSignature = boardRecordSignature(boardName, board);
@@ -624,6 +633,66 @@ export function App() {
     return () => window.clearTimeout(timeout);
   }, [saveStatus]);
 
+  useEffect(() => {
+    boardZoomRef.current = board.zoom;
+  }, [board.zoom]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) {
+      return;
+    }
+
+    const handleWheel = (event: globalThis.WheelEvent) => {
+      if (!activeBoardId || (!event.ctrlKey && !event.metaKey)) {
+        return;
+      }
+
+      event.preventDefault();
+      const currentZoom = boardZoomRef.current;
+      updateZoom(currentZoom * Math.exp(-event.deltaY * 0.002), {
+        clientX: event.clientX,
+        clientY: event.clientY
+      }, currentZoom);
+    };
+
+    const handleGestureStart = (event: Event) => {
+      if (!activeBoardId) {
+        return;
+      }
+
+      event.preventDefault();
+      gestureStartZoomRef.current = boardZoomRef.current;
+    };
+
+    const handleGestureChange = (event: Event) => {
+      if (!activeBoardId) {
+        return;
+      }
+
+      event.preventDefault();
+      const gestureEvent = event as WebKitGestureEvent;
+      updateZoom(gestureStartZoomRef.current * gestureEvent.scale, {
+        clientX: gestureEvent.clientX,
+        clientY: gestureEvent.clientY
+      }, boardZoomRef.current);
+    };
+
+    viewport.addEventListener("wheel", handleWheel, { passive: false });
+    viewport.addEventListener("gesturestart", handleGestureStart, {
+      passive: false
+    });
+    viewport.addEventListener("gesturechange", handleGestureChange, {
+      passive: false
+    });
+
+    return () => {
+      viewport.removeEventListener("wheel", handleWheel);
+      viewport.removeEventListener("gesturestart", handleGestureStart);
+      viewport.removeEventListener("gesturechange", handleGestureChange);
+    };
+  }, [activeBoardId]);
+
   async function saveBoard() {
     if (!activeBoardId) {
       return;
@@ -840,6 +909,40 @@ export function App() {
     setDrag(null);
   }
 
+  function updateZoom(
+    nextZoom: number,
+    anchor?: { clientX: number; clientY: number },
+    sourceZoom = board.zoom
+  ) {
+    if (!activeBoardId) {
+      return;
+    }
+
+    const viewport = viewportRef.current;
+    const boardElement = boardRef.current;
+    const zoom = clampZoom(nextZoom);
+
+    if (!anchor || !viewport || !boardElement) {
+      setBoard((current) => ({ ...current, zoom }));
+      return;
+    }
+
+    const boardRect = boardElement.getBoundingClientRect();
+    const viewportRect = viewport.getBoundingClientRect();
+    const boardX = (anchor.clientX - boardRect.left) / sourceZoom;
+    const boardY = (anchor.clientY - boardRect.top) / sourceZoom;
+    const viewportX = anchor.clientX - viewportRect.left;
+    const viewportY = anchor.clientY - viewportRect.top;
+
+    boardZoomRef.current = zoom;
+    setBoard((current) => ({ ...current, zoom }));
+
+    window.requestAnimationFrame(() => {
+      viewport.scrollLeft = boardX * zoom - viewportX;
+      viewport.scrollTop = boardY * zoom - viewportY;
+    });
+  }
+
   function updateSelectedPerson(updates: Partial<PersonCard>) {
     if (!selectedPerson || !activeBoardId) {
       return;
@@ -1007,12 +1110,7 @@ export function App() {
             type="button"
             aria-label="Zoom out"
             disabled={!activeBoardId}
-            onClick={() =>
-              setBoard((current) => ({
-                ...current,
-                zoom: clampZoom(current.zoom - 0.1)
-              }))
-            }
+            onClick={() => updateZoom(board.zoom - 0.1)}
           >
             <ZoomOut size={18} />
           </button>
@@ -1021,12 +1119,7 @@ export function App() {
             type="button"
             aria-label="Zoom in"
             disabled={!activeBoardId}
-            onClick={() =>
-              setBoard((current) => ({
-                ...current,
-                zoom: clampZoom(current.zoom + 0.1)
-              }))
-            }
+            onClick={() => updateZoom(board.zoom + 0.1)}
           >
             <ZoomIn size={18} />
           </button>
@@ -1040,6 +1133,7 @@ export function App() {
       <main className="workspace">
         <section
           className="board-viewport"
+          ref={viewportRef}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={() => setDrag(null)}
