@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-06-10T20:28:11.682Z",
+      "updatedAt": "2026-06-17T13:46:35.011Z",
       "state": {
         "people": [
           {
@@ -14,8 +14,8 @@
             "title": "EVP of HTD Talent",
             "costType": "annual",
             "costAmount": "210000",
-            "x": 978.7003348214286,
-            "y": 24
+            "x": 1113.264136904762,
+            "y": 45.09375
           },
           {
             "id": "melanie-edwards",
@@ -41,8 +41,8 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
-            "x": 1009.1316964285716,
-            "y": 626.8515625
+            "x": 1069.001488095238,
+            "y": 715.9986979166666
           },
           {
             "id": "kristine-torreon",
@@ -50,8 +50,8 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
-            "x": 1280.6992187500002,
-            "y": 625.9464285714287
+            "x": 1362.0078125000002,
+            "y": 715.7706473214287
           },
           {
             "id": "person-1780578540255",
@@ -82,21 +82,12 @@
           },
           {
             "id": "person-1780593760155",
-            "name": "BDM- Experienced",
-            "title": "Role title",
+            "name": "Kirsten Watson",
+            "title": "BD Manager",
             "costType": "annual",
             "costAmount": "80000",
             "x": 24,
             "y": 386.93526785714283
-          },
-          {
-            "id": "person-1780593845579",
-            "name": "Sr. Recruiter- Offshore",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "30000",
-            "x": 986.3526785714283,
-            "y": 270.9899553571428
           },
           {
             "id": "person-1780593913676",
@@ -104,17 +95,8 @@
             "title": "Role title",
             "costType": "annual",
             "costAmount": "45000",
-            "x": 282.4386160714286,
-            "y": 422.0591517857145
-          },
-          {
-            "id": "person-1780594004201",
-            "name": "Recruiter- Offshore",
-            "title": "Role title",
-            "costType": "annual",
-            "costAmount": "20000",
-            "x": 752.3024553571429,
-            "y": 619.3504464285713
+            "x": 289.8930431547619,
+            "y": 421.6099330357145
           },
           {
             "id": "person-1780594725768",
@@ -122,8 +104,17 @@
             "title": "Role title",
             "costType": "annual",
             "costAmount": "45000",
-            "x": 541.2287946428571,
-            "y": 401.0502232142857
+            "x": 558.3511904761904,
+            "y": 403.0033482142857
+          },
+          {
+            "id": "person-1781703939771",
+            "name": "Roland",
+            "title": "BD Director",
+            "costType": "annual",
+            "costAmount": "90000",
+            "x": 775.6627604166667,
+            "y": 708.5924479166666
           }
         ],
         "connections": [
@@ -153,21 +144,6 @@
             "toId": "person-1780593760155"
           },
           {
-            "id": "robert-roll-person-1780593845579",
-            "fromId": "robert-roll",
-            "toId": "person-1780593845579"
-          },
-          {
-            "id": "person-1780593845579-lorens-laygo",
-            "fromId": "person-1780593845579",
-            "toId": "lorens-laygo"
-          },
-          {
-            "id": "person-1780593845579-kristine-torreon",
-            "fromId": "person-1780593845579",
-            "toId": "kristine-torreon"
-          },
-          {
             "id": "melanie-edwards-person-1780593913676",
             "fromId": "melanie-edwards",
             "toId": "person-1780593913676"
@@ -178,14 +154,24 @@
             "toId": "person-1780578540255"
           },
           {
-            "id": "person-1780593845579-person-1780594004201",
-            "fromId": "person-1780593845579",
-            "toId": "person-1780594004201"
-          },
-          {
             "id": "melanie-edwards-person-1780594725768",
             "fromId": "melanie-edwards",
             "toId": "person-1780594725768"
+          },
+          {
+            "id": "robert-roll-lorens-laygo",
+            "fromId": "robert-roll",
+            "toId": "lorens-laygo"
+          },
+          {
+            "id": "robert-roll-kristine-torreon",
+            "fromId": "robert-roll",
+            "toId": "kristine-torreon"
+          },
+          {
+            "id": "robert-roll-person-1781703939771",
+            "fromId": "robert-roll",
+            "toId": "person-1781703939771"
           }
         ],
         "zoom": 0.6
