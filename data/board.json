@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-06-22T18:53:22.066Z",
+      "updatedAt": "2026-06-22T18:53:40.740Z",
       "state": {
         "people": [
           {
@@ -50,8 +50,8 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
-            "x": 1404.1953125000002,
-            "y": 689.3709077380953
+            "x": 1407.006479041165,
+            "y": 655.6813055794607
           },
           {
             "id": "person-1780578540255",
@@ -113,8 +113,8 @@
             "title": "BD Director",
             "costType": "annual",
             "costAmount": "90000",
-            "x": 982.9479166666667,
-            "y": 464.66666666666663
+            "x": 1103.128639558233,
+            "y": 268.50702811244975
           }
         ],
         "connections": [
