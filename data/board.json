@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-06-17T13:49:06.531Z",
+      "updatedAt": "2026-06-22T18:53:22.066Z",
       "state": {
         "people": [
           {
@@ -23,8 +23,8 @@
             "title": "Client Director at HTD Talent",
             "costType": "annual",
             "costAmount": "110000",
-            "x": 49.12202380952374,
-            "y": 174.3396577380952
+            "x": 286.3712522045854,
+            "y": 202.28622409611987
           },
           {
             "id": "sue-molina",
@@ -174,7 +174,7 @@
             "toId": "kristine-torreon"
           }
         ],
-        "zoom": 0.6
+        "zoom": 0.83
       }
     },
     {
