@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-06-22T19:23:39.951Z",
+      "updatedAt": "2026-06-23T15:58:31.752Z",
       "state": {
         "people": [
           {
@@ -109,7 +109,7 @@
           },
           {
             "id": "person-1781703939771",
-            "name": "Roland",
+            "name": "Demand Gen OR",
             "title": "BD Director",
             "costType": "annual",
             "costAmount": "90000",
