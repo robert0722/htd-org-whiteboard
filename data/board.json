@@ -243,7 +243,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T17:57:22.474Z",
+      "updatedAt": "2026-07-10T18:12:09.465Z",
       "state": {
         "people": [
           {
@@ -271,8 +271,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 310.30257936507934,
-            "y": 245.14260912698407
+            "x": 280.86061507936506,
+            "y": 185.41046626984118
           },
           {
             "id": "sue-molina",
@@ -285,8 +285,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1199.228050595238,
-            "y": 238.33587549603166
+            "x": 1208.8541666666665,
+            "y": 183.80462549603166
           },
           {
             "id": "lorens-laygo",
@@ -299,8 +299,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 93.25781249999997,
-            "y": 573.4791666666666
+            "x": 24,
+            "y": 518.2447916666666
           },
           {
             "id": "kristine-torreon",
@@ -313,8 +313,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 417.9952256944447,
-            "y": 573.5896577380954
+            "x": 308.29656498015896,
+            "y": 521.6979166666669
           },
           {
             "id": "person-1780578540255",
@@ -346,7 +346,7 @@
           },
           {
             "id": "person-1780578660422",
-            "name": "Tech Screening Pool",
+            "name": "Tech Screeners (PT)",
             "title": "Tech Screener",
             "costType": "annual",
             "costAmount": "10000",
@@ -355,8 +355,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1027.848995873756,
-            "y": 517.8933013118867
+            "x": 1011.5264512308986,
+            "y": 438.9870513118867
           },
           {
             "id": "person-1783651712357",
@@ -369,8 +369,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 633.5264862804878,
-            "y": 342.1202362804878
+            "x": 601.445013066202,
+            "y": 432.00304878048786
           }
         ],
         "connections": [
