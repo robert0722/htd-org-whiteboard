@@ -243,7 +243,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T18:17:27.177Z",
+      "updatedAt": "2026-07-10T18:17:58.393Z",
       "state": {
         "people": [
           {
@@ -279,7 +279,7 @@
           {
             "id": "sue-molina",
             "name": "Sue Molina",
-            "title": "Operations Manager",
+            "title": "Operations/Onboarding Manager",
             "costType": "annual",
             "costAmount": "20000",
             "status": "filled",
@@ -289,7 +289,7 @@
             "department": "",
             "hiringOwner": "",
             "x": 1201.6834077380952,
-            "y": 252.37047371031738
+            "y": 252.19748263888883
           },
           {
             "id": "lorens-laygo",
