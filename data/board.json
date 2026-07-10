@@ -243,7 +243,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T18:17:58.393Z",
+      "updatedAt": "2026-07-10T18:18:16.798Z",
       "state": {
         "people": [
           {
@@ -324,7 +324,7 @@
           {
             "id": "person-1780578540255",
             "name": "Bhadz Jimlah",
-            "title": "Sales Ops",
+            "title": "Sales/Marketing Ops",
             "costType": "annual",
             "costAmount": "17000",
             "status": "filled",
@@ -339,7 +339,7 @@
           {
             "id": "person-1780578590984",
             "name": "Nash",
-            "title": "Marketing",
+            "title": "Marketing Ops",
             "costType": "annual",
             "costAmount": "10000",
             "status": "filled",
