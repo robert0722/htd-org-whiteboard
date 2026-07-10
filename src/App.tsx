@@ -298,6 +298,75 @@ function cardCenter(card: PersonCard) {
   };
 }
 
+function compositePdfBoard(
+  boardCanvas: HTMLCanvasElement,
+  people: PersonCard[],
+  connections: Connection[],
+  boardWidth: number,
+  boardHeight: number
+) {
+  const composite = document.createElement("canvas");
+  composite.width = boardCanvas.width;
+  composite.height = boardCanvas.height;
+  const context = composite.getContext("2d");
+
+  if (!context) {
+    return boardCanvas;
+  }
+
+  const scale = boardCanvas.width / boardWidth;
+  const peopleById = new Map(people.map((person) => [person.id, person]));
+
+  context.fillStyle = "#f8fafc";
+  context.fillRect(0, 0, composite.width, composite.height);
+  context.save();
+  context.scale(scale, scale);
+  context.strokeStyle = "#269dd9";
+  context.fillStyle = "#269dd9";
+  context.lineCap = "round";
+  context.lineWidth = 3;
+
+  connections.forEach((connection) => {
+    const from = peopleById.get(connection.fromId);
+    const to = peopleById.get(connection.toId);
+    if (!from || !to) {
+      return;
+    }
+
+    const start = cardCenter(from);
+    const end = cardCenter(to);
+    const curve = Math.max(70, Math.abs(end.y - start.y) / 2);
+    const startY = start.y + CARD_HEIGHT / 2 - 12;
+    const endY = end.y - CARD_HEIGHT / 2 + 12;
+    const controlEndY = end.y - curve;
+
+    context.beginPath();
+    context.moveTo(start.x, startY);
+    context.bezierCurveTo(start.x, start.y + curve, end.x, controlEndY, end.x, endY);
+    context.stroke();
+
+    const arrowAngle = Math.atan2(endY - controlEndY, 0);
+    const arrowLength = 10;
+    const arrowWidth = 5;
+    context.beginPath();
+    context.moveTo(end.x, endY);
+    context.lineTo(
+      end.x - arrowLength * Math.cos(arrowAngle) + arrowWidth * Math.sin(arrowAngle),
+      endY - arrowLength * Math.sin(arrowAngle) - arrowWidth * Math.cos(arrowAngle)
+    );
+    context.lineTo(
+      end.x - arrowLength * Math.cos(arrowAngle) - arrowWidth * Math.sin(arrowAngle),
+      endY - arrowLength * Math.sin(arrowAngle) + arrowWidth * Math.cos(arrowAngle)
+    );
+    context.closePath();
+    context.fill();
+  });
+
+  context.restore();
+  context.drawImage(boardCanvas, 0, 0);
+  return composite;
+}
+
 function formatCost(person: PersonCard) {
   const numeric = Number(person.costAmount);
   if (!numeric) {
@@ -1190,7 +1259,7 @@ export function App() {
       // live workforce summary at four times their rendered size (384 DPI).
       const [boardCanvas, summaryCanvas] = await Promise.all([
         html2canvas(boardElement, {
-          backgroundColor: "#f8fafc",
+          backgroundColor: null,
           height: boardHeight,
           logging: false,
           scale: 4,
@@ -1204,6 +1273,10 @@ export function App() {
               clonedBoard.style.transform = "none";
               clonedBoard.style.width = `${boardWidth}px`;
             }
+            clonedDocument.querySelector<HTMLElement>(".connections")?.style.setProperty(
+              "display",
+              "none"
+            );
             clonedDocument.querySelectorAll(".person-card.selected").forEach((card) => {
               card.classList.remove("selected");
             });
@@ -1220,6 +1293,13 @@ export function App() {
           width: summaryWidth
         })
       ]);
+      const exportBoardCanvas = compositePdfBoard(
+        boardCanvas,
+        board.people,
+        board.connections,
+        boardWidth,
+        boardHeight
+      );
 
       const pageWidth = boardWidth + summaryWidth + exportMargin * 3;
       const pageHeight = Math.max(boardHeight, summaryHeight) + exportMargin * 2;
@@ -1238,7 +1318,7 @@ export function App() {
       pdf.setFillColor(248, 250, 252);
       pdf.rect(0, 0, pageWidth, pageHeight, "F");
       pdf.addImage(
-        boardCanvas,
+        exportBoardCanvas,
         "PNG",
         exportMargin,
         exportMargin,
@@ -1408,7 +1488,7 @@ export function App() {
                 height: `${980 / board.zoom}px`
               }}
             >
-              <svg className="connections" aria-hidden="true">
+              <svg className="connections" aria-hidden="true" width="100%" height="100%">
                 <defs>
                   <marker
                     id="arrowhead"
