@@ -505,6 +505,7 @@ export function App() {
   const [isSaving, setIsSaving] = useState(false);
   const viewportRef = useRef<HTMLElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
+  const summaryRef = useRef<HTMLElement | null>(null);
   const boardZoomRef = useRef(board.zoom);
   const gestureStartZoomRef = useRef(board.zoom);
 
@@ -1162,7 +1163,8 @@ export function App() {
 
   async function downloadPdf() {
     const boardElement = boardRef.current;
-    if (!activeBoardId || !boardElement || isExportingPdf) {
+    const summaryElement = summaryRef.current;
+    if (!activeBoardId || !boardElement || !summaryElement || isExportingPdf) {
       return;
     }
 
@@ -1172,36 +1174,58 @@ export function App() {
         import("html2canvas"),
         import("jspdf")
       ]);
-      // Capture the board at four times its on-screen dimensions. The resulting
-      // 5,760 x 3,920 image is placed at 384 DPI in the PDF, so card text and
-      // connection lines remain crisp when viewed at high zoom.
       await document.fonts?.ready;
-      const canvas = await html2canvas(boardElement, {
-        backgroundColor: "#f8fafc",
-        height: 980,
-        logging: false,
-        scale: 4,
-        width: 1440,
-        windowHeight: 980,
-        windowWidth: 1440,
-        onclone: (clonedDocument) => {
-          const clonedBoard = clonedDocument.querySelector<HTMLElement>(".board");
-          if (clonedBoard) {
-            clonedBoard.style.transform = "none";
-            clonedBoard.style.width = "1440px";
-            clonedBoard.style.height = "980px";
+      const exportMargin = 48;
+      const boardWidth = Math.ceil(
+        Math.max(1440, ...board.people.map((person) => person.x + CARD_WIDTH + exportMargin))
+      );
+      const boardHeight = Math.ceil(
+        Math.max(980, ...board.people.map((person) => person.y + CARD_HEIGHT + exportMargin))
+      );
+      const summaryRect = summaryElement.getBoundingClientRect();
+      const summaryWidth = Math.ceil(summaryRect.width);
+      const summaryHeight = Math.ceil(summaryRect.height);
+
+      // The page expands to include every card, then captures the board and
+      // live workforce summary at four times their rendered size (384 DPI).
+      const [boardCanvas, summaryCanvas] = await Promise.all([
+        html2canvas(boardElement, {
+          backgroundColor: "#f8fafc",
+          height: boardHeight,
+          logging: false,
+          scale: 4,
+          width: boardWidth,
+          windowHeight: boardHeight,
+          windowWidth: boardWidth,
+          onclone: (clonedDocument) => {
+            const clonedBoard = clonedDocument.querySelector<HTMLElement>(".board");
+            if (clonedBoard) {
+              clonedBoard.style.height = `${boardHeight}px`;
+              clonedBoard.style.transform = "none";
+              clonedBoard.style.width = `${boardWidth}px`;
+            }
+            clonedDocument.querySelectorAll(".person-card.selected").forEach((card) => {
+              card.classList.remove("selected");
+            });
+            clonedDocument.querySelectorAll<HTMLElement>(".connector-handle").forEach((handle) => {
+              handle.style.display = "none";
+            });
           }
-          clonedDocument.querySelectorAll(".person-card.selected").forEach((card) => {
-            card.classList.remove("selected");
-          });
-          clonedDocument.querySelectorAll<HTMLElement>(".connector-handle").forEach((handle) => {
-            handle.style.display = "none";
-          });
-        }
-      });
+        }),
+        html2canvas(summaryElement, {
+          backgroundColor: null,
+          height: summaryHeight,
+          logging: false,
+          scale: 4,
+          width: summaryWidth
+        })
+      ]);
+
+      const pageWidth = boardWidth + summaryWidth + exportMargin * 3;
+      const pageHeight = Math.max(boardHeight, summaryHeight) + exportMargin * 2;
 
       const pdf = new jsPDF({
-        format: [1440, 980],
+        format: [pageWidth, pageHeight],
         hotfixes: ["px_scaling"],
         orientation: "landscape",
         unit: "px"
@@ -1211,7 +1235,28 @@ export function App() {
         subject: "High-resolution org whiteboard export",
         author: "HTD Talent"
       });
-      pdf.addImage(canvas, "PNG", 0, 0, 1440, 980, undefined, "FAST");
+      pdf.setFillColor(248, 250, 252);
+      pdf.rect(0, 0, pageWidth, pageHeight, "F");
+      pdf.addImage(
+        boardCanvas,
+        "PNG",
+        exportMargin,
+        exportMargin,
+        boardWidth,
+        boardHeight,
+        undefined,
+        "FAST"
+      );
+      pdf.addImage(
+        summaryCanvas,
+        "PNG",
+        boardWidth + exportMargin * 2,
+        exportMargin,
+        summaryWidth,
+        summaryHeight,
+        undefined,
+        "FAST"
+      );
       const filename = `${normalizeBoardName(boardName)
         .replace(/[^a-z0-9]+/gi, "-")
         .replace(/^-|-$/g, "") || "org-whiteboard"}.pdf`;
@@ -1465,7 +1510,11 @@ export function App() {
         </section>
 
         <aside className="inspector">
-          <section className="cost-summary" aria-label="Workforce plan summary">
+          <section
+            className="cost-summary"
+            ref={summaryRef}
+            aria-label="Workforce plan summary"
+          >
             <div className="summary-heading">
               <div>
                 <p>Loaded workforce plan</p>
@@ -1477,7 +1526,8 @@ export function App() {
               {headcount.total} roles · {headcount.filled} filled · {headcount.planned} planned
             </span>
             <span>
-              Base pay {moneyFormatter.format(costs.baseAnnual)} · {costs.employerCostsPercent}% load
+              Monthly base pay {moneyFormatter.format(costs.baseAnnual / 12)} ·{" "}
+              {costs.employerCostsPercent}% load
             </span>
             {costs.budgetAnnual > 0 ? (
               <div className={`budget-status ${costs.remainingAnnual < 0 ? "over" : "within"}`}>
