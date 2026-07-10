@@ -181,7 +181,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Lean HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-06-22T19:08:55.547Z",
+      "updatedAt": "2026-07-10T02:50:08.240Z",
       "state": {
         "people": [
           {
@@ -190,6 +190,11 @@
             "title": "EVP of HTD Talent",
             "costType": "annual",
             "costAmount": "210000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 774.4818401318861,
             "y": 34.66176470588235
           },
@@ -199,6 +204,11 @@
             "title": "Client Director at HTD Talent",
             "costType": "annual",
             "costAmount": "90000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 310.30257936507934,
             "y": 245.14260912698407
           },
@@ -208,6 +218,11 @@
             "title": "Operations Manager",
             "costType": "annual",
             "costAmount": "20000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1199.228050595238,
             "y": 238.33587549603166
           },
@@ -217,6 +232,11 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 93.25781249999997,
             "y": 573.4791666666666
           },
@@ -226,6 +246,11 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 417.9952256944447,
             "y": 573.5896577380954
           },
@@ -235,6 +260,11 @@
             "title": "Sales Ops",
             "costType": "annual",
             "costAmount": "17000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1330.9602554563498,
             "y": 509.62177579365084
           },
@@ -244,6 +274,11 @@
             "title": "Marketing",
             "costType": "annual",
             "costAmount": "10000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1333.735615079365,
             "y": 753.3418898809525
           },
@@ -253,8 +288,27 @@
             "title": "Tech Screener",
             "costType": "annual",
             "costAmount": "10000",
-            "x": 955.3737672152195,
-            "y": 509.45675405578913
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
+            "x": 1027.848995873756,
+            "y": 517.8933013118867
+          },
+          {
+            "id": "person-1783651712357",
+            "name": "Kirsten Watson",
+            "title": "Sr. BD Manager",
+            "costType": "annual",
+            "costAmount": "80000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
+            "x": 633.5264862804878,
+            "y": 342.1202362804878
           }
         ],
         "connections": [
@@ -292,9 +346,16 @@
             "id": "melanie-edwards-kristine-torreon",
             "fromId": "melanie-edwards",
             "toId": "kristine-torreon"
+          },
+          {
+            "id": "melanie-edwards-person-1783651712357",
+            "fromId": "melanie-edwards",
+            "toId": "person-1783651712357"
           }
         ],
-        "zoom": 1.02
+        "zoom": 1.1,
+        "budgetAnnual": "",
+        "employerCostsPercent": "0"
       }
     }
   ]
