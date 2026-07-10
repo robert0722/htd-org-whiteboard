@@ -243,13 +243,13 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T18:16:06.507Z",
+      "updatedAt": "2026-07-10T18:17:01.942Z",
       "state": {
         "people": [
           {
             "id": "robert-roll",
             "name": "Robert Rolle",
-            "title": "EVP of HTD Talent",
+            "title": "CEO",
             "costType": "annual",
             "costAmount": "210000",
             "status": "filled",
@@ -258,7 +258,7 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 774.4818401318861,
+            "x": 774.6492508461718,
             "y": 34.66176470588235
           },
           {
