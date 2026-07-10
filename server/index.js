@@ -119,6 +119,10 @@ function normalizeBoardRecord(value, fallbackId) {
       typeof value.updatedAt === "string" && value.updatedAt
         ? value.updatedAt
         : now,
+    scenarioOf:
+      typeof value.scenarioOf === "string" && value.scenarioOf.trim()
+        ? value.scenarioOf.trim()
+        : undefined,
     state: value.state
   };
 }
@@ -225,6 +229,10 @@ app.put("/api/boards/:id", async (req, res) => {
       name: normalizeBoardName(req.body.name ?? existing?.name),
       createdAt: existing?.createdAt ?? req.body.createdAt ?? now,
       updatedAt: now,
+      scenarioOf:
+        typeof req.body.scenarioOf === "string" && req.body.scenarioOf.trim()
+          ? req.body.scenarioOf.trim()
+          : existing?.scenarioOf,
       state: req.body.state
     };
     const document = {

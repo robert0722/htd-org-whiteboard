@@ -1,5 +1,7 @@
 import {
+  BadgeDollarSign,
   CircleDollarSign,
+  Copy,
   Link2,
   LocateFixed,
   Plus,
@@ -12,6 +14,8 @@ import {
 import { PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type CostType = "monthly" | "annual";
+type RoleStatus = "filled" | "planned";
+type HiringStage = "not-open" | "sourcing" | "interviewing" | "offer" | "accepted";
 
 type PersonCard = {
   id: string;
@@ -19,6 +23,11 @@ type PersonCard = {
   title: string;
   costType: CostType;
   costAmount: string;
+  status: RoleStatus;
+  hiringStage: HiringStage;
+  targetStartDate: string;
+  department: string;
+  hiringOwner: string;
   x: number;
   y: number;
 };
@@ -33,6 +42,8 @@ type BoardState = {
   people: PersonCard[];
   connections: Connection[];
   zoom: number;
+  budgetAnnual: string;
+  employerCostsPercent: string;
 };
 
 type BoardRecord = {
@@ -40,6 +51,7 @@ type BoardRecord = {
   name: string;
   createdAt: string;
   updatedAt: string;
+  scenarioOf?: string;
   state: BoardState;
 };
 
@@ -73,7 +85,7 @@ const LAST_ACTIVE_BOARD_KEY = "htd-org-whiteboard-active-board-v2";
 const API_BASE_URL =
   import.meta.env.VITE_BOARD_API_URL || "https://htd-org-whiteboard-api.onrender.com";
 const CARD_WIDTH = 236;
-const CARD_HEIGHT = 142;
+const CARD_HEIGHT = 176;
 const DEFAULT_BOARD_NAME = "Untitled board";
 const MAIN_BOARD_ID = "main-board";
 
@@ -87,15 +99,19 @@ function blankBoardState(): BoardState {
   return {
     people: [],
     connections: [],
-    zoom: 1
+    zoom: 1,
+    budgetAnnual: "",
+    employerCostsPercent: "0"
   };
 }
 
 function cloneBoardState(board: BoardState): BoardState {
   return {
-    people: board.people.map((person) => ({ ...person })),
+    people: board.people.map((person) => normalizePerson(person)),
     connections: board.connections.map((connection) => ({ ...connection })),
-    zoom: board.zoom || 1
+    zoom: board.zoom || 1,
+    budgetAnnual: board.budgetAnnual || "",
+    employerCostsPercent: board.employerCostsPercent || "0"
   };
 }
 
@@ -117,9 +133,49 @@ function normalizeBoardState(value: unknown): BoardState | null {
   }
 
   return {
-    people: people as PersonCard[],
+    people: people.filter(isObject).map(normalizePerson),
     connections: connections as Connection[],
-    zoom
+    zoom,
+    budgetAnnual:
+      typeof value.budgetAnnual === "string" || typeof value.budgetAnnual === "number"
+        ? String(value.budgetAnnual)
+        : "",
+    employerCostsPercent:
+      typeof value.employerCostsPercent === "string" ||
+      typeof value.employerCostsPercent === "number"
+        ? String(value.employerCostsPercent)
+        : "0"
+  };
+}
+
+function normalizePerson(value: unknown): PersonCard {
+  const person = isObject(value) ? value : {};
+  const status: RoleStatus = person.status === "planned" ? "planned" : "filled";
+  const hiringStage: HiringStage =
+    person.hiringStage === "sourcing" ||
+    person.hiringStage === "interviewing" ||
+    person.hiringStage === "offer" ||
+    person.hiringStage === "accepted"
+      ? person.hiringStage
+      : "not-open";
+
+  return {
+    id: typeof person.id === "string" ? person.id : `person-${Date.now()}`,
+    name: typeof person.name === "string" ? person.name : "New person",
+    title: typeof person.title === "string" ? person.title : "Role title",
+    costType: person.costType === "monthly" ? "monthly" : "annual",
+    costAmount:
+      typeof person.costAmount === "string" || typeof person.costAmount === "number"
+        ? String(person.costAmount)
+        : "",
+    status,
+    hiringStage,
+    targetStartDate:
+      typeof person.targetStartDate === "string" ? person.targetStartDate : "",
+    department: typeof person.department === "string" ? person.department : "",
+    hiringOwner: typeof person.hiringOwner === "string" ? person.hiringOwner : "",
+    x: typeof person.x === "number" ? person.x : 24,
+    y: typeof person.y === "number" ? person.y : 24
   };
 }
 
@@ -159,6 +215,10 @@ function normalizeBoardRecord(value: unknown, fallbackId: string): BoardRecord |
       typeof value.updatedAt === "string" && value.updatedAt
         ? value.updatedAt
         : now,
+    scenarioOf:
+      typeof value.scenarioOf === "string" && value.scenarioOf.trim()
+        ? value.scenarioOf.trim()
+        : undefined,
     state
   };
 }
@@ -243,6 +303,43 @@ function formatCost(person: PersonCard) {
     return "Cost TBD";
   }
   return `${moneyFormatter.format(numeric)} / ${person.costType === "monthly" ? "mo" : "yr"}`;
+}
+
+function annualCost(person: PersonCard) {
+  const numeric = Number(person.costAmount) || 0;
+  return person.costType === "monthly" ? numeric * 12 : numeric;
+}
+
+function boardCosts(board: BoardState) {
+  const baseAnnual = board.people.reduce(
+    (total, person) => total + annualCost(person),
+    0
+  );
+  const employerCostsPercent = Math.max(0, Number(board.employerCostsPercent) || 0);
+  const loadedAnnual = baseAnnual * (1 + employerCostsPercent / 100);
+  const budgetAnnual = Number(board.budgetAnnual) || 0;
+
+  return {
+    baseAnnual,
+    loadedAnnual,
+    budgetAnnual,
+    remainingAnnual: budgetAnnual - loadedAnnual,
+    employerCostsPercent
+  };
+}
+
+function headcountSummary(board: BoardState) {
+  const filled = board.people.filter((person) => person.status === "filled").length;
+  return {
+    total: board.people.length,
+    filled,
+    planned: board.people.length - filled
+  };
+}
+
+function formatDelta(value: number) {
+  const prefix = value > 0 ? "+" : value < 0 ? "−" : "";
+  return `${prefix}${moneyFormatter.format(Math.abs(value))}`;
 }
 
 function clampZoom(value: number) {
@@ -392,6 +489,9 @@ export function App() {
   const [boardName, setBoardName] = useState(
     initialActiveBoard?.name ?? DEFAULT_BOARD_NAME
   );
+  const [comparisonBoardId, setComparisonBoardId] = useState(
+    initialActiveBoard?.scenarioOf ?? ""
+  );
   const [selectedId, setSelectedId] = useState(
     initialActiveBoard?.state.people[0]?.id ?? ""
   );
@@ -435,31 +535,15 @@ export function App() {
   const selectedManagerId =
     board.connections.find((connection) => connection.toId === selectedId)
       ?.fromId ?? "";
-  const totalCost = useMemo(
-    () =>
-      board.people.reduce(
-        (totals, person) => {
-          const amount = Number(person.costAmount);
-          if (!amount) {
-            return totals;
-          }
-
-          if (person.costType === "monthly") {
-            return {
-              annual: totals.annual + amount * 12,
-              monthly: totals.monthly + amount
-            };
-          }
-
-          return {
-            annual: totals.annual + amount,
-            monthly: totals.monthly + amount / 12
-          };
-        },
-        { annual: 0, monthly: 0 }
-      ),
-    [board.people]
-  );
+  const costs = useMemo(() => boardCosts(board), [board]);
+  const headcount = useMemo(() => headcountSummary(board), [board]);
+  const comparisonBoard =
+    boards.find((entry) => entry.id === comparisonBoardId && entry.id !== activeBoardId) ??
+    null;
+  const comparisonCosts = comparisonBoard ? boardCosts(comparisonBoard.state) : null;
+  const comparisonHeadcount = comparisonBoard
+    ? headcountSummary(comparisonBoard.state)
+    : null;
 
   function activateBoard(record: BoardRecord | null, status?: string) {
     setDrag(null);
@@ -469,6 +553,7 @@ export function App() {
       setBoardName(DEFAULT_BOARD_NAME);
       setBoard(blankBoardState());
       setSelectedId("");
+      setComparisonBoardId("");
       window.localStorage.removeItem(LAST_ACTIVE_BOARD_KEY);
       setSaveStatus(status ?? "No boards yet");
       return;
@@ -478,6 +563,7 @@ export function App() {
     setBoardName(record.name);
     setBoard(cloneBoardState(record.state));
     setSelectedId(record.state.people[0]?.id ?? "");
+    setComparisonBoardId(record.scenarioOf ?? "");
     window.localStorage.setItem(LAST_ACTIVE_BOARD_KEY, record.id);
     setSaveStatus(status ?? "All changes saved");
   }
@@ -704,6 +790,7 @@ export function App() {
       name: normalizeBoardName(boardName),
       createdAt: activeBoard?.createdAt ?? now,
       updatedAt: activeBoard?.updatedAt ?? now,
+      scenarioOf: activeBoard?.scenarioOf,
       state: cloneBoardState(board)
     };
 
@@ -760,6 +847,36 @@ export function App() {
 
       setBoards([...nextBoards, newBoard]);
       activateBoard(newBoard, "New board ready to save");
+    });
+  }
+
+  function createScenario() {
+    if (!activeBoardId) {
+      return;
+    }
+
+    afterDiscardConfirmation(() => {
+      const now = new Date().toISOString();
+      const nextBoards = discardUnsavedNewBoard(boards);
+      const sourceBoard: BoardRecord = {
+        id: activeBoardId,
+        name: normalizeBoardName(boardName),
+        createdAt: activeBoard?.createdAt ?? now,
+        updatedAt: activeBoard?.updatedAt ?? now,
+        scenarioOf: activeBoard?.scenarioOf,
+        state: cloneBoardState(board)
+      };
+      const scenario: BoardRecord = {
+        id: `scenario-${Date.now()}`,
+        name: `${normalizeBoardName(boardName)} scenario`,
+        createdAt: now,
+        updatedAt: now,
+        scenarioOf: activeBoardId,
+        state: cloneBoardState(board)
+      };
+
+      setBoards([...upsertBoard(nextBoards, sourceBoard), scenario]);
+      activateBoard(scenario, "Scenario ready to save");
     });
   }
 
@@ -956,6 +1073,14 @@ export function App() {
     }));
   }
 
+  function updateBoardPlan(updates: Partial<BoardState>) {
+    if (!activeBoardId) {
+      return;
+    }
+
+    setBoard((current) => ({ ...current, ...updates }));
+  }
+
   function updateSelectedManager(managerId: string) {
     if (!selectedPerson || !activeBoardId) {
       return;
@@ -992,6 +1117,11 @@ export function App() {
       title: "Role title",
       costType: "annual",
       costAmount: "",
+      status: "planned",
+      hiringStage: "not-open",
+      targetStartDate: "",
+      department: "",
+      hiringOwner: "",
       x: 420 + board.people.length * 18,
       y: 220 + board.people.length * 18
     };
@@ -1067,6 +1197,15 @@ export function App() {
           <button type="button" className="primary-action" onClick={createBoard}>
             <Plus size={18} />
             New board
+          </button>
+          <button
+            type="button"
+            className="scenario-action"
+            onClick={createScenario}
+            disabled={!activeBoardId || isSaving}
+          >
+            <Copy size={17} />
+            New scenario
           </button>
           <button
             type="button"
@@ -1206,6 +1345,9 @@ export function App() {
                 >
                   <div className="card-header">
                     <div className="avatar">{person.name.slice(0, 1)}</div>
+                    <span className={`role-status ${person.status}`}>
+                      {person.status === "filled" ? "Filled" : "Planned"}
+                    </span>
                     <button
                       type="button"
                       className="connector-handle"
@@ -1220,6 +1362,14 @@ export function App() {
                   </div>
                   <h2>{person.name}</h2>
                   <p>{person.title}</p>
+                  {(person.department || person.status === "planned") && (
+                    <div className="card-meta">
+                      <span>{person.department || "Department TBD"}</span>
+                      {person.status === "planned" && (
+                        <span>{person.hiringStage.replace("-", " ")}</span>
+                      )}
+                    </div>
+                  )}
                   <div className="cost-row">
                     <CircleDollarSign size={16} />
                     <span>{formatCost(person)}</span>
@@ -1239,12 +1389,110 @@ export function App() {
         </section>
 
         <aside className="inspector">
-          <section className="cost-summary" aria-label="Total team cost">
-            <div>
-              <p>Total team cost</p>
-              <h2>{moneyFormatter.format(totalCost.annual)} / yr</h2>
+          <section className="cost-summary" aria-label="Workforce plan summary">
+            <div className="summary-heading">
+              <div>
+                <p>Loaded workforce plan</p>
+                <h2>{moneyFormatter.format(costs.loadedAnnual)} / yr</h2>
+              </div>
+              <BadgeDollarSign size={23} aria-hidden="true" />
             </div>
-            <span>{moneyFormatter.format(totalCost.monthly)} / mo</span>
+            <span>
+              {headcount.total} roles · {headcount.filled} filled · {headcount.planned} planned
+            </span>
+            <span>
+              Base pay {moneyFormatter.format(costs.baseAnnual)} · {costs.employerCostsPercent}% load
+            </span>
+            {costs.budgetAnnual > 0 ? (
+              <div className={`budget-status ${costs.remainingAnnual < 0 ? "over" : "within"}`}>
+                {costs.remainingAnnual < 0
+                  ? `${moneyFormatter.format(Math.abs(costs.remainingAnnual))} over budget`
+                  : `${moneyFormatter.format(costs.remainingAnnual)} remaining`}
+              </div>
+            ) : (
+              <div className="budget-status empty">Set a budget to turn on guardrails</div>
+            )}
+          </section>
+
+          <section className="planning-panel" aria-label="Scenario comparison and budget settings">
+            <div className="panel-heading compact">
+              <Copy size={17} />
+              <h2>Scenario comparison</h2>
+            </div>
+            <label>
+              Compare this board with
+              <select
+                value={comparisonBoardId}
+                onChange={(event) => setComparisonBoardId(event.target.value)}
+                disabled={!activeBoardId}
+              >
+                <option value="">Choose a board</option>
+                {displayedBoards
+                  .filter((entry) => entry.id !== activeBoardId)
+                  .map((entry) => (
+                    <option value={entry.id} key={entry.id}>
+                      {normalizeBoardName(entry.name)}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            {comparisonBoard && comparisonCosts && comparisonHeadcount && (
+              <div className="comparison-results">
+                <div>
+                  <span>Role change</span>
+                  <strong>
+                    {headcount.total - comparisonHeadcount.total > 0 ? "+" : ""}
+                    {headcount.total - comparisonHeadcount.total}
+                  </strong>
+                </div>
+                <div>
+                  <span>Loaded cost</span>
+                  <strong>{formatDelta(costs.loadedAnnual - comparisonCosts.loadedAnnual)}</strong>
+                </div>
+                <div>
+                  <span>Planned hires</span>
+                  <strong>
+                    {headcount.planned - comparisonHeadcount.planned > 0 ? "+" : ""}
+                    {headcount.planned - comparisonHeadcount.planned}
+                  </strong>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className="planning-panel" aria-label="Budget guardrails">
+            <div className="panel-heading compact">
+              <BadgeDollarSign size={18} />
+              <h2>Budget guardrails</h2>
+            </div>
+            <div className="planning-fields">
+              <label>
+                Annual budget
+                <input
+                  inputMode="numeric"
+                  placeholder="e.g. 1250000"
+                  value={board.budgetAnnual}
+                  onChange={(event) =>
+                    updateBoardPlan({
+                      budgetAnnual: event.target.value.replace(/[^\d.]/g, "")
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Employer cost load %
+                <input
+                  inputMode="decimal"
+                  placeholder="e.g. 20"
+                  value={board.employerCostsPercent}
+                  onChange={(event) =>
+                    updateBoardPlan({
+                      employerCostsPercent: event.target.value.replace(/[^\d.]/g, "")
+                    })
+                  }
+                />
+              </label>
+            </div>
           </section>
           <div className="panel-heading">
             <Users size={18} />
@@ -1271,6 +1519,30 @@ export function App() {
                 />
               </label>
               <label>
+                Role status
+                <select
+                  value={selectedPerson.status}
+                  onChange={(event) =>
+                    updateSelectedPerson({
+                      status: event.target.value as RoleStatus
+                    })
+                  }
+                >
+                  <option value="filled">Filled</option>
+                  <option value="planned">Planned hire</option>
+                </select>
+              </label>
+              <label>
+                Department
+                <input
+                  value={selectedPerson.department}
+                  placeholder="e.g. Delivery"
+                  onChange={(event) =>
+                    updateSelectedPerson({ department: event.target.value })
+                  }
+                />
+              </label>
+              <label>
                 Reports to
                 <select
                   value={selectedManagerId}
@@ -1283,9 +1555,50 @@ export function App() {
                       <option value={person.id} key={person.id}>
                         {person.name}
                       </option>
-                    ))}
+                  ))}
                 </select>
               </label>
+              {selectedPerson.status === "planned" && (
+                <>
+                  <label>
+                    Hiring stage
+                    <select
+                      value={selectedPerson.hiringStage}
+                      onChange={(event) =>
+                        updateSelectedPerson({
+                          hiringStage: event.target.value as HiringStage
+                        })
+                      }
+                    >
+                      <option value="not-open">Not open</option>
+                      <option value="sourcing">Sourcing</option>
+                      <option value="interviewing">Interviewing</option>
+                      <option value="offer">Offer</option>
+                      <option value="accepted">Accepted</option>
+                    </select>
+                  </label>
+                  <label>
+                    Target start date
+                    <input
+                      type="date"
+                      value={selectedPerson.targetStartDate}
+                      onChange={(event) =>
+                        updateSelectedPerson({ targetStartDate: event.target.value })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Hiring owner
+                    <input
+                      value={selectedPerson.hiringOwner}
+                      placeholder="Name or team"
+                      onChange={(event) =>
+                        updateSelectedPerson({ hiringOwner: event.target.value })
+                      }
+                    />
+                  </label>
+                </>
+              )}
               <label>
                 Cost amount
                 <input
