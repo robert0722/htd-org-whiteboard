@@ -243,7 +243,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T18:12:12.852Z",
+      "updatedAt": "2026-07-10T18:14:46.620Z",
       "state": {
         "people": [
           {
@@ -271,8 +271,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 280.86061507936506,
-            "y": 185.41046626984118
+            "x": 402.5068204365079,
+            "y": 238.0778769841269
           },
           {
             "id": "sue-molina",
@@ -285,8 +285,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1208.8541666666665,
-            "y": 183.80462549603166
+            "x": 1201.6834077380952,
+            "y": 252.37047371031738
           },
           {
             "id": "lorens-laygo",
@@ -299,8 +299,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 24,
-            "y": 518.2447916666666
+            "x": 662.6774553571429,
+            "y": 548.4512648809524
           },
           {
             "id": "kristine-torreon",
@@ -313,8 +313,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 308.29656498015896,
-            "y": 521.6979166666669
+            "x": 345.0990203373018,
+            "y": 544.6778273809526
           },
           {
             "id": "person-1780578540255",
@@ -327,8 +327,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1330.9602554563498,
-            "y": 509.62177579365084
+            "x": 1287.4557911706354,
+            "y": 550.9945436507937
           },
           {
             "id": "person-1780578590984",
@@ -341,8 +341,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1333.735615079365,
-            "y": 753.3418898809525
+            "x": 1568.2166418650795,
+            "y": 554.5472470238096
           },
           {
             "id": "person-1780578660422",
@@ -355,8 +355,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1011.5264512308986,
-            "y": 438.9870513118867
+            "x": 1000.1034601594699,
+            "y": 554.0930780976009
           },
           {
             "id": "person-1783651712357",
@@ -369,8 +369,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 601.445013066202,
-            "y": 432.00304878048786
+            "x": 63.78794642857143,
+            "y": 480.83675413763075
           }
         ],
         "connections": [
@@ -383,11 +383,6 @@
             "id": "robert-sue",
             "fromId": "robert-roll",
             "toId": "sue-molina"
-          },
-          {
-            "id": "person-1780578540255-person-1780578590984",
-            "fromId": "person-1780578540255",
-            "toId": "person-1780578590984"
           },
           {
             "id": "sue-molina-person-1780578660422",
@@ -413,6 +408,11 @@
             "id": "melanie-edwards-person-1783651712357",
             "fromId": "melanie-edwards",
             "toId": "person-1783651712357"
+          },
+          {
+            "id": "sue-molina-person-1780578590984",
+            "fromId": "sue-molina",
+            "toId": "person-1780578590984"
           }
         ],
         "zoom": 0.7,
