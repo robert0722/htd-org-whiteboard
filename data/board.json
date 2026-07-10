@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-07-10T02:55:27.908Z",
+      "updatedAt": "2026-07-10T02:56:15.208Z",
       "state": {
         "people": [
           {
@@ -131,8 +131,8 @@
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 557.8196536144578,
-            "y": 371.8217669786288
+            "x": 635.5019452811244,
+            "y": 464.97280864529546
           },
           {
             "id": "person-1780593913676",
