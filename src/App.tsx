@@ -16,6 +16,7 @@ import { PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type CostType = "monthly" | "annual";
 type RoleStatus = "filled" | "planned";
+type WorkLocation = "onshore" | "offshore";
 type HiringStage = "not-open" | "sourcing" | "interviewing" | "offer" | "accepted";
 
 type PersonCard = {
@@ -25,6 +26,7 @@ type PersonCard = {
   costType: CostType;
   costAmount: string;
   status: RoleStatus;
+  workLocation: WorkLocation;
   hiringStage: HiringStage;
   targetStartDate: string;
   department: string;
@@ -152,6 +154,7 @@ function normalizeBoardState(value: unknown): BoardState | null {
 function normalizePerson(value: unknown): PersonCard {
   const person = isObject(value) ? value : {};
   const status: RoleStatus = person.status === "planned" ? "planned" : "filled";
+  const workLocation: WorkLocation = person.workLocation === "offshore" ? "offshore" : "onshore";
   const hiringStage: HiringStage =
     person.hiringStage === "sourcing" ||
     person.hiringStage === "interviewing" ||
@@ -170,6 +173,7 @@ function normalizePerson(value: unknown): PersonCard {
         ? String(person.costAmount)
         : "",
     status,
+    workLocation,
     hiringStage,
     targetStartDate:
       typeof person.targetStartDate === "string" ? person.targetStartDate : "",
@@ -1190,6 +1194,7 @@ export function App() {
       costType: "annual",
       costAmount: "",
       status: "planned",
+      workLocation: "onshore",
       hiringStage: "not-open",
       targetStartDate: "",
       department: "",
@@ -1546,8 +1551,8 @@ export function App() {
                 >
                   <div className="card-header">
                     <div className="avatar">{person.name.slice(0, 1)}</div>
-                    <span className={`role-status ${person.status}`}>
-                      {person.status === "filled" ? "Filled" : "Planned"}
+                    <span className={`role-status ${person.workLocation}`}>
+                      {person.workLocation}
                     </span>
                     <button
                       type="button"
@@ -1736,6 +1741,20 @@ export function App() {
                 >
                   <option value="filled">Filled</option>
                   <option value="planned">Planned hire</option>
+                </select>
+              </label>
+              <label>
+                Work location
+                <select
+                  value={selectedPerson.workLocation}
+                  onChange={(event) =>
+                    updateSelectedPerson({
+                      workLocation: event.target.value as WorkLocation
+                    })
+                  }
+                >
+                  <option value="onshore">Onshore</option>
+                  <option value="offshore">Offshore</option>
                 </select>
               </label>
               <label>

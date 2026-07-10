@@ -383,14 +383,14 @@ marker polygon {
   text-transform: uppercase;
 }
 
-.role-status.filled {
-  background: #dcfce7;
-  color: #166534;
+.role-status.onshore {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
-.role-status.planned {
-  background: #fef3c7;
-  color: #92400e;
+.role-status.offshore {
+  background: #ede9fe;
+  color: #6d28d9;
 }
 
 .connector-handle:hover {
