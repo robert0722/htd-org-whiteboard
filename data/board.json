@@ -5,7 +5,7 @@
       "id": "main-board",
       "name": "Future HTD Org: 2026",
       "createdAt": "2026-06-07T00:00:00.000Z",
-      "updatedAt": "2026-06-23T16:27:57.463Z",
+      "updatedAt": "2026-07-10T02:55:27.908Z",
       "state": {
         "people": [
           {
@@ -14,6 +14,11 @@
             "title": "EVP of HTD Talent",
             "costType": "annual",
             "costAmount": "210000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1113.264136904762,
             "y": 45.09375
           },
@@ -23,6 +28,11 @@
             "title": "Client Director at HTD Talent",
             "costType": "annual",
             "costAmount": "110000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 286.3712522045854,
             "y": 202.28622409611987
           },
@@ -32,6 +42,11 @@
             "title": "Operations Manager",
             "costType": "annual",
             "costAmount": "20000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1812.6785714285713,
             "y": 193.71781994047606
           },
@@ -41,6 +56,11 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1405.9155505952383,
             "y": 458.74609375
           },
@@ -50,6 +70,11 @@
             "title": "IT Sourcer",
             "costType": "annual",
             "costAmount": "12000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1407.006479041165,
             "y": 655.6813055794607
           },
@@ -59,6 +84,11 @@
             "title": "Sales Ops",
             "costType": "annual",
             "costAmount": "17000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 2040.7996651785722,
             "y": 414.14434523809524
           },
@@ -68,6 +98,11 @@
             "title": "Marketing",
             "costType": "annual",
             "costAmount": "10000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 2041.0186011904764,
             "y": 646.2260044642858
           },
@@ -77,6 +112,11 @@
             "title": "Tech Screener",
             "costType": "annual",
             "costAmount": "10000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1722.9776785714287,
             "y": 444.35360863095246
           },
@@ -86,6 +126,11 @@
             "title": "BD Manager",
             "costType": "annual",
             "costAmount": "80000",
+            "status": "filled",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 557.8196536144578,
             "y": 371.8217669786288
           },
@@ -95,8 +140,13 @@
             "title": "Role title",
             "costType": "annual",
             "costAmount": "",
-            "x": 88.75395555436037,
-            "y": 1070.4033881059959
+            "status": "planned",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
+            "x": 102.74484097102706,
+            "y": 691.9854193559958
           },
           {
             "id": "person-1780594725768",
@@ -104,8 +154,13 @@
             "title": "Role title",
             "costType": "annual",
             "costAmount": "",
-            "x": 400.58591060671233,
-            "y": 1073.851898666093
+            "status": "planned",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
+            "x": 395.27992102337896,
+            "y": 696.4625757494262
           },
           {
             "id": "person-1781703939771",
@@ -113,6 +168,11 @@
             "title": "BD Director",
             "costType": "annual",
             "costAmount": "90000",
+            "status": "planned",
+            "hiringStage": "not-open",
+            "targetStartDate": "",
+            "department": "",
+            "hiringOwner": "",
             "x": 1069.5019452811248,
             "y": 312.6429467871486
           }
@@ -174,7 +234,9 @@
             "toId": "kristine-torreon"
           }
         ],
-        "zoom": 0.83
+        "zoom": 0.6,
+        "budgetAnnual": "45000",
+        "employerCostsPercent": "0"
       }
     },
     {
