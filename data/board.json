@@ -243,7 +243,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T18:14:46.620Z",
+      "updatedAt": "2026-07-10T18:16:06.507Z",
       "state": {
         "people": [
           {
@@ -253,6 +253,7 @@
             "costType": "annual",
             "costAmount": "210000",
             "status": "filled",
+            "workLocation": "onshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
@@ -267,6 +268,7 @@
             "costType": "annual",
             "costAmount": "110000",
             "status": "filled",
+            "workLocation": "onshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
@@ -281,6 +283,7 @@
             "costType": "annual",
             "costAmount": "20000",
             "status": "filled",
+            "workLocation": "offshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
@@ -295,12 +298,13 @@
             "costType": "annual",
             "costAmount": "12000",
             "status": "filled",
+            "workLocation": "offshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
             "x": 662.6774553571429,
-            "y": 548.4512648809524
+            "y": 548.2782738095239
           },
           {
             "id": "kristine-torreon",
@@ -309,12 +313,13 @@
             "costType": "annual",
             "costAmount": "12000",
             "status": "filled",
+            "workLocation": "offshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
             "x": 345.0990203373018,
-            "y": 544.6778273809526
+            "y": 544.5048363095241
           },
           {
             "id": "person-1780578540255",
@@ -323,6 +328,7 @@
             "costType": "annual",
             "costAmount": "17000",
             "status": "filled",
+            "workLocation": "offshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
@@ -337,11 +343,12 @@
             "costType": "annual",
             "costAmount": "10000",
             "status": "filled",
+            "workLocation": "offshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
             "hiringOwner": "",
-            "x": 1568.2166418650795,
+            "x": 1568.043650793651,
             "y": 554.5472470238096
           },
           {
@@ -351,6 +358,7 @@
             "costType": "annual",
             "costAmount": "10000",
             "status": "filled",
+            "workLocation": "offshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
@@ -365,6 +373,7 @@
             "costType": "annual",
             "costAmount": "80000",
             "status": "filled",
+            "workLocation": "onshore",
             "hiringStage": "not-open",
             "targetStartDate": "",
             "department": "",
