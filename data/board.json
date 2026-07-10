@@ -243,7 +243,7 @@
       "id": "future-htd-org-2026-copy",
       "name": "Current HTD Org: 2026",
       "createdAt": "2026-06-08T20:38:32.407Z",
-      "updatedAt": "2026-07-10T18:18:16.798Z",
+      "updatedAt": "2026-07-10T18:18:26.474Z",
       "state": {
         "people": [
           {
@@ -341,7 +341,7 @@
             "name": "Nash",
             "title": "Marketing Ops",
             "costType": "annual",
-            "costAmount": "10000",
+            "costAmount": "12000",
             "status": "filled",
             "workLocation": "offshore",
             "hiringStage": "not-open",
