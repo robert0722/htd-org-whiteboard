@@ -2,6 +2,7 @@ import {
   BadgeDollarSign,
   CircleDollarSign,
   Copy,
+  Download,
   Link2,
   LocateFixed,
   Plus,
@@ -500,6 +501,7 @@ export function App() {
   const [saveStatus, setSaveStatus] = useState(
     initialDocument.boards.length ? "Loading shared boards" : "No boards yet"
   );
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const viewportRef = useRef<HTMLElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -1158,6 +1160,70 @@ export function App() {
     setBoard((current) => ({ ...current, zoom: 0.82 }));
   }
 
+  async function downloadPdf() {
+    const boardElement = boardRef.current;
+    if (!activeBoardId || !boardElement || isExportingPdf) {
+      return;
+    }
+
+    setIsExportingPdf(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf")
+      ]);
+      // Capture the board at four times its on-screen dimensions. The resulting
+      // 5,760 x 3,920 image is placed at 384 DPI in the PDF, so card text and
+      // connection lines remain crisp when viewed at high zoom.
+      await document.fonts?.ready;
+      const canvas = await html2canvas(boardElement, {
+        backgroundColor: "#f8fafc",
+        height: 980,
+        logging: false,
+        scale: 4,
+        width: 1440,
+        windowHeight: 980,
+        windowWidth: 1440,
+        onclone: (clonedDocument) => {
+          const clonedBoard = clonedDocument.querySelector<HTMLElement>(".board");
+          if (clonedBoard) {
+            clonedBoard.style.transform = "none";
+            clonedBoard.style.width = "1440px";
+            clonedBoard.style.height = "980px";
+          }
+          clonedDocument.querySelectorAll(".person-card.selected").forEach((card) => {
+            card.classList.remove("selected");
+          });
+          clonedDocument.querySelectorAll<HTMLElement>(".connector-handle").forEach((handle) => {
+            handle.style.display = "none";
+          });
+        }
+      });
+
+      const pdf = new jsPDF({
+        format: [1440, 980],
+        hotfixes: ["px_scaling"],
+        orientation: "landscape",
+        unit: "px"
+      });
+      pdf.setProperties({
+        title: `${normalizeBoardName(boardName)} - Org Whiteboard`,
+        subject: "High-resolution org whiteboard export",
+        author: "HTD Talent"
+      });
+      pdf.addImage(canvas, "PNG", 0, 0, 1440, 980, undefined, "FAST");
+      const filename = `${normalizeBoardName(boardName)
+        .replace(/[^a-z0-9]+/gi, "-")
+        .replace(/^-|-$/g, "") || "org-whiteboard"}.pdf`;
+      pdf.save(filename);
+    } catch (error) {
+      console.error("Could not export board PDF", error);
+      setSaveStatus("PDF export failed - please try again");
+    } finally {
+      setIsExportingPdf(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -1265,6 +1331,16 @@ export function App() {
           <button type="button" onClick={fitView} disabled={!activeBoardId}>
             <LocateFixed size={18} />
             Fit
+          </button>
+          <button
+            type="button"
+            className="pdf-action"
+            onClick={downloadPdf}
+            disabled={!activeBoardId || isExportingPdf}
+            title="Download a 384 DPI PDF of this board"
+          >
+            <Download size={18} />
+            {isExportingPdf ? "Building PDF" : "Download PDF"}
           </button>
         </div>
       </header>

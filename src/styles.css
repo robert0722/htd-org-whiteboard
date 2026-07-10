@@ -173,6 +173,16 @@ button:disabled {
   background: rgba(255, 255, 255, 0.14);
 }
 
+.toolbar .pdf-action {
+  background: #52e0d2;
+  border-color: #52e0d2;
+  color: #0f172a;
+}
+
+.toolbar .pdf-action:hover:not(:disabled) {
+  background: #7be9df;
+}
+
 .topbar-danger {
   background: rgba(244, 63, 94, 0.14) !important;
   border-color: rgba(254, 205, 211, 0.28);
