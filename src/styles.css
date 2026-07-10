@@ -444,6 +444,8 @@ marker polygon {
 .inspector {
   background: #ffffff;
   border-left: 1px solid #dbe5ed;
+  overscroll-behavior: contain;
+  overflow-y: auto;
   padding: 20px;
 }
 
